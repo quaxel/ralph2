@@ -77,6 +77,7 @@ class RalphOrchestrator {
 
             if (!currentTask) {
                 this.isRunning = false;
+                console.log(`--- Pipeline Finished for Project: ${this.id} ---`);
                 await dbUtils.saveProject({ id: this.id, status: 'completed' });
                 this.updateDashboard({ status: 'completed', message: 'All tasks finished!' });
                 break;
@@ -102,6 +103,10 @@ class RalphOrchestrator {
             if (isValid) {
                 currentTask.passes = true;
                 await fileUtils.writeFile(plansPath, JSON.stringify(currentPrd, null, 2));
+
+                // Sync with Database so dashboard stays updated correctly
+                await dbUtils.saveProject({ id: this.id, prd: currentPrd });
+
                 await gitUtils.addAndCommit(this.projectRoot, `Completed: ${currentTask.title}`);
                 this.updateDashboard({
                     message: `Success: ${currentTask.title} verified.`,

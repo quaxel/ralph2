@@ -259,11 +259,14 @@
     <div id="newProjectModal">
         <div class="modal-content">
             <h3>New Ralph Project</h3>
-            <input type="text" id="pName" placeholder="Project Name">
-            <input type="text" id="pPath" placeholder="Absolute Path">
-            <textarea id="pPrd" rows="5" placeholder='PRD JSON (e.g. {"stories": [...]})'></textarea>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Project will be created in:
+                <code>/projects/[name]</code>
+            </p>
+            <input type="text" id="pName" placeholder="Project Name (e.g. my-awesome-app)">
+            <textarea id="pPrd" rows="5"
+                placeholder='Optional: Initial PRD JSON or leave empty for AI Generation'></textarea>
             <div style="display: flex; gap: 1rem;">
-                <button onclick="createProject()" class="btn-start" style="flex: 1;">Create</button>
+                <button onclick="createProject()" class="btn-start" style="flex: 1;">Create Project</button>
                 <button onclick="document.getElementById('newProjectModal').style.display='none'"
                     style="flex: 1; background: #334155; color: white;">Cancel</button>
             </div>
@@ -321,14 +324,15 @@
 
         async function createProject() {
             const name = document.getElementById('pName').value;
-            const path = document.getElementById('pPath').value;
             const prdRaw = document.getElementById('pPrd').value || '{"stories":[]}';
+
+            if (!name) return alert("Please enter a project name");
 
             try {
                 const res = await fetch('/api/projects', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, path, prd: JSON.parse(prdRaw) })
+                    body: JSON.stringify({ name, prd: JSON.parse(prdRaw) })
                 });
                 await loadProjects();
                 document.getElementById('newProjectModal').style.display = 'none';

@@ -73,6 +73,70 @@
       "status": "completed",
       "createdAt": "2026-02-05T23:19:25.739Z",
       "updatedAt": "2026-02-05T23:57:28.757Z"
+    },
+    {
+      "id": "Dice_game",
+      "name": "Dice_game",
+      "path": "/Users/muharremdedeoglu/Development/Ralp-pipeline-2/ralph-pipeline-manager/projects/Dice_game",
+      "prd": {
+        "project": "Web-Based 3D Dice Roller (Three.js, Single-File)",
+        "description": "Build a beginner-friendly, single-file HTML application that renders a procedural 3D dice on a table using Three.js and allows users to roll it via button click or Space key. The dice should animate with smooth, physical-feeling motion, then stop on a valid randomly selected face (1-6) and display the result clearly in the UI.",
+        "stories": [
+          {
+            "title": "Initialize single-file app with Three.js from CDN",
+            "description": "Create one self-contained HTML file using pure HTML, CSS, and vanilla JavaScript. Load latest stable Three.js from CDN. Do not use frameworks or external assets.",
+            "passes": true
+          },
+          {
+            "title": "Set up core 3D scene",
+            "description": "Implement scene, perspective camera, and WebGL renderer. Add responsive canvas behavior that resizes with the window. Keep OrbitControls optional and only include if it does not add complexity.",
+            "passes": true
+          },
+          {
+            "title": "Create procedural table environment",
+            "description": "Add a subtle-colored ground plane to represent a table. Configure ambient and directional lighting with shadows enabled so the dice casts a visible shadow.",
+            "passes": true
+          },
+          {
+            "title": "Build procedural dice model without textures/models",
+            "description": "Create a cube-based dice with white body and dark pips, fully generated in code. Implement pips using either CanvasTexture per face or pip meshes placed on faces.",
+            "passes": true
+          },
+          {
+            "title": "Implement roll interaction controls",
+            "description": "Add HTML overlay UI with a 'ROLL' button and keyboard shortcut (Space) to trigger rolling. Prevent repeated roll input while an active roll animation is in progress.",
+            "passes": true
+          },
+          {
+            "title": "Animate dice roll with physical feel",
+            "description": "Implement roll animation with easing (damped/tween-like interpolation), including a subtle shake or bounce effect to improve perceived realism.",
+            "passes": true
+          },
+          {
+            "title": "Ensure valid deterministic final face result",
+            "description": "On each roll, randomly select an integer 1-6, animate motion, and smoothly snap dice orientation so the selected face is clearly up at animation end. Ensure final state is valid and unambiguous.",
+            "passes": true
+          },
+          {
+            "title": "Display result and rolling status",
+            "description": "Show 'Result: X' text that updates after each completed roll and a subtle status indicator such as 'Rolling...' while animation is active.",
+            "passes": true
+          },
+          {
+            "title": "Organize code for readability and maintainability",
+            "description": "Structure implementation into beginner-friendly functions such as init(), createDice(), rollDice(), animate(), and setDiceToFace(n). Add clear comments on key logic paths.",
+            "passes": true
+          },
+          {
+            "title": "Validate final output constraints",
+            "description": "Confirm deliverable is only one fully working HTML file with no external assets, no frameworks, and behavior that matches all scene, interaction, animation, and UI requirements.",
+            "passes": true
+          }
+        ]
+      },
+      "status": "completed",
+      "createdAt": "2026-02-06T00:18:33.564Z",
+      "updatedAt": "2026-02-06T00:31:29.241Z"
     }
   ],
   "settings": {

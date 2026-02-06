@@ -36,8 +36,19 @@ class RalphServer {
 
         // API: Create new project
         this.app.post('/api/projects', async (req, res) => {
-            const { name, path: projectPath, prd } = req.body;
-            const project = { id: name, name, path: projectPath, prd, status: 'created' };
+            const { name, path: manualPath, prd } = req.body;
+
+            // Auto-generate project path if not provided manually
+            const projectPath = manualPath || path.join(process.cwd(), 'projects', name);
+
+            const project = {
+                id: name,
+                name,
+                path: projectPath,
+                prd: prd || { stories: [] },
+                status: 'created'
+            };
+
             await dbUtils.saveProject(project);
             res.json(project);
         });
