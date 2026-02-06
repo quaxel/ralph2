@@ -1,0 +1,23 @@
+{
+    "name": "ralph-pipeline-manager",
+    "version": "1.0.0",
+    "description": "Ralph pipeline orchestrator and manager",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "dependencies": {
+        "chokidar": "^3.5.3",
+        "dotenv": "^17.2.4",
+        "express": "^4.18.2",
+        "fs-extra": "^11.2.0",
+        "lowdb": "^7.0.1",
+        "simple-git": "^3.22.0",
+        "ws": "^8.16.0"
+    },
+    "devDependencies": {
+        "codex-cli": "file:./placeholders/codex-cli"
+    }
+}

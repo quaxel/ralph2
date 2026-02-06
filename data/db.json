@@ -1,0 +1,82 @@
+{
+  "projects": [
+    {
+      "id": "proje_1_oyun",
+      "name": "proje_1_oyun",
+      "path": "/Users/muharremdedeoglu/Development/Ralp-pipeline-2/ralph-pipeline-manager/proje_1_oyun",
+      "prd": {
+        "project": "Cube Dash 3D",
+        "description": "Build a small but complete web-based 3D endless runner/dodge game using Three.js in a single HTML file. The player controls a cube moving left/right to avoid incoming obstacles, with score increasing over survival time, progressive difficulty, basic audio feedback, and a polished but simple visual style.",
+        "stories": [
+          {
+            "title": "Define Single-File Game Architecture",
+            "description": "Create one self-contained HTML file with embedded CSS and JavaScript. Include Three.js latest stable CDN import, initialize global game state, and structure code into clear beginner-friendly functions such as init, animate, handleInput, spawnObstacle, updateObstacles, detectCollision, updateScore, setGameOver, and restartGame.",
+            "passes": false
+          },
+          {
+            "title": "Initialize 3D Scene and Rendering Pipeline",
+            "description": "Set up Three.js scene, perspective camera, and renderer. Configure renderer sizing, pixel ratio, and append canvas to the document. Implement responsive resize handling to maintain correct aspect ratio and viewport behavior.",
+            "passes": false
+          },
+          {
+            "title": "Implement Lighting and Environment",
+            "description": "Add ambient and directional lights for clear visibility and depth. Create a ground plane with a colorful but clean material. Ensure scene composition is visually simple, readable, and polished.",
+            "passes": false
+          },
+          {
+            "title": "Create Player Cube with Smooth Movement",
+            "description": "Add a player cube mesh with colorful material. Implement lane-based or bounded horizontal movement using ArrowLeft/ArrowRight and A/D keys. Use lerp-based smoothing so movement feels fluid rather than instant.",
+            "passes": false
+          },
+          {
+            "title": "Build Obstacle Spawning System",
+            "description": "Generate obstacles at random horizontal positions ahead of the player and move them toward the camera/player over time. Manage obstacle lifecycle by removing off-screen objects to avoid memory/performance issues.",
+            "passes": false
+          },
+          {
+            "title": "Add Collision Detection and Failure Logic",
+            "description": "Detect overlap between player and obstacles using bounding checks (e.g., Box3 or simplified AABB). Trigger game-over state immediately on collision, halt active gameplay updates, and present restart prompt.",
+            "passes": false
+          },
+          {
+            "title": "Implement Score and Difficulty Progression",
+            "description": "Increase score continuously based on survival time and display it in real time. Scale difficulty over time by increasing obstacle speed and/or spawn frequency while keeping progression smooth and fair.",
+            "passes": false
+          },
+          {
+            "title": "Deliver Game State Management and Restart Flow",
+            "description": "Support at least two states: playing and game over. On restart input (e.g., R key or Enter), reset score, timers, obstacle arrays, player position, speed scaling, and UI state without reloading the page.",
+            "passes": false
+          },
+          {
+            "title": "Implement HTML Overlay UI",
+            "description": "Create lightweight HTML overlay for score and game-over text above the WebGL canvas. Ensure clear typography, contrast, and placement. Show/hide messages based on game state transitions.",
+            "passes": false
+          },
+          {
+            "title": "Add Simple Animations for Visual Polish",
+            "description": "Introduce subtle animation effects such as obstacle rotation, player bounce/tilt, or scene motion accents. Keep animations lightweight and readable to maintain beginner-friendly code and stable performance.",
+            "passes": false
+          },
+          {
+            "title": "Integrate Basic Sound Effects with Web Audio API",
+            "description": "Use Web Audio API to synthesize simple SFX (e.g., movement blip, score tick cadence, collision/game-over tone). Ensure audio initialization complies with browser gesture requirements and does not require external audio files.",
+            "passes": false
+          },
+          {
+            "title": "Enforce Code Quality and Delivery Requirements",
+            "description": "Comment key logic clearly, keep naming and function boundaries clean, and maintain readability for beginners. Ensure final output is a fully working standalone HTML game with no external frameworks beyond Three.js CDN.",
+            "passes": false
+          }
+        ]
+      },
+      "status": "completed",
+      "createdAt": "2026-02-05T23:19:25.739Z",
+      "updatedAt": "2026-02-05T23:57:28.757Z"
+    }
+  ],
+  "settings": {
+    "maxIterations": 100,
+    "codexPath": "codex"
+  }
+}

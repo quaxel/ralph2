@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ralph Pipeline Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #38bdf8;
+            --success: #10b981;
+            --error: #ef4444;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 300px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .project-item {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .project-item.active {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent);
+        }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: none;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-start {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-stop {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-init {
+            background: var(--accent);
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .card .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .log-container {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 1rem;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+        }
+
+        .log-time {
+            color: var(--text-dim);
+            margin-right: 0.5rem;
+        }
+
+        /* Modal */
+        #newProjectModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            place-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 400px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <aside>
+        <h2>Projects</h2>
+        <button onclick="document.getElementById('newProjectModal').style.display='grid'"
+            style="background: var(--accent); color: white; margin-bottom: 1rem; width: 100%;">+ New Project</button>
+        <div id="projectList" class="project-list"></div>
+    </aside>
+
+    <main id="mainView">
+        <header>
+            <h1 id="viewTitle">Select a Project</h1>
+            <div class="controls">
+                <button class="btn-init" onclick="controlAction('init')">Initialize</button>
+                <button class="btn-start" onclick="controlAction('start')">Start Pipeline</button>
+                <button class="btn-stop" onclick="controlAction('stop')">Stop</button>
+            </div>
+        </header>
+
+        <!-- New PRD Generator Section -->
+        <div class="card"
+            style="margin-bottom: 1rem; border-color: var(--accent); background: rgba(56, 189, 248, 0.05);">
+            <h2 style="color: var(--accent);">AI PRD Generator</h2>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" id="prdPrompt"
+                    placeholder="Describe your project (e.g. 'A weather app with unit conversion')"
+                    style="margin-bottom: 0; flex-grow: 1;">
+                <button class="btn-init" onclick="generatePRD()" style="white-space: nowrap;">Generate JSON PRD</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Status</h2>
+                <div id="statusVal" class="value">Idle</div>
+            </div>
+            <div class="card">
+                <h2>Iteration</h2>
+                <div id="iterVal" class="value">0 / 100</div>
+            </div>
+            <div class="card">
+                <h2>Task</h2>
+                <div id="taskVal" class="value">N/A</div>
+            </div>
+        </div>
+
+        <!-- Task List Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2>Project Plan (Stories)</h2>
+            <div id="taskList" style="margin-top: 1rem;">
+                <div style="color: var(--text-dim); font-style: italic;">No tasks found. Generate a PRD first.</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Live Feed</h2>
+            <div id="logs" class="log-container"></div>
+        </div>
+    </main>
+
+    <div id="newProjectModal">
+        <div class="modal-content">
+            <h3>New Ralph Project</h3>
+            <input type="text" id="pName" placeholder="Project Name">
+            <input type="text" id="pPath" placeholder="Absolute Path">
+            <textarea id="pPrd" rows="5" placeholder='PRD JSON (e.g. {"stories": [...]})'></textarea>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="createProject()" class="btn-start" style="flex: 1;">Create</button>
+                <button onclick="document.getElementById('newProjectModal').style.display='none'"
+                    style="flex: 1; background: #334155; color: white;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProjectId = null;
+        let projects = [];
+
+        async function loadProjects() {
+            const res = await fetch('/api/projects');
+            projects = await res.json();
+            renderProjectList();
+        }
+
+        function renderProjectList() {
+            const list = document.getElementById('projectList');
+            list.innerHTML = projects.map(p => `
+                <div class="project-item ${p.id === currentProjectId ? 'active' : ''}" onclick="selectProject('${p.id}')">
+                    <div style="font-weight: 600;">${p.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-dim);">${p.status}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectProject(id) {
+            currentProjectId = id;
+            const p = projects.find(x => x.id === id);
+            document.getElementById('mainView').style.display = 'block';
+            document.getElementById('viewTitle').innerText = p.name;
+            document.getElementById('statusVal').innerText = p.status;
+            renderProjectList();
+            renderTaskList(p);
+        }
+
+        function renderTaskList(project) {
+            const container = document.getElementById('taskList');
+            if (!project.prd || !project.prd.stories || project.prd.stories.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-dim); font-style: italic;">No tasks found. Generate a PRD first.</div>';
+                return;
+            }
+
+            container.innerHTML = project.prd.stories.map(s => `
+                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${s.passes ? 'var(--success)' : '#334155'};"></div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight: 600; font-size: 0.9rem; color: ${s.passes ? 'var(--success)' : 'white'}">${s.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim);">${s.description}</div>
+                    </div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: ${s.passes ? 'var(--success)' : 'var(--text-dim)'}">${s.passes ? 'DONE' : 'PENDING'}</div>
+                </div>
+            `).join('');
+        }
+
+        async function createProject() {
+            const name = document.getElementById('pName').value;
+            const path = document.getElementById('pPath').value;
+            const prdRaw = document.getElementById('pPrd').value || '{"stories":[]}';
+
+            try {
+                const res = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, path, prd: JSON.parse(prdRaw) })
+                });
+                await loadProjects();
+                document.getElementById('newProjectModal').style.display = 'none';
+            } catch (e) { alert("Invalid PRD JSON. Leave empty or use {} for a blank start."); }
+        }
+
+        async function controlAction(action) {
+            if (!currentProjectId) return;
+            const res = await fetch(`/api/projects/${currentProjectId}/${action}`, { method: 'POST' });
+            const data = await res.json();
+            addLog(`Action [${action}] sent. Result: ${data.status}`);
+        }
+
+        async function generatePRD() {
+            if (!currentProjectId) return;
+            const prompt = document.getElementById('prdPrompt').value;
+            if (!prompt) return alert("Please enter a description");
+
+            addLog("AI is generating PRD... Deep thinking active.");
+            const res = await fetch(`/api/projects/${currentProjectId}/generate-prd`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+            const data = await res.json();
+            if (data.status === 'prd_generated') {
+                addLog("PRD Generated successfully!");
+                await loadProjects();
+                selectProject(currentProjectId); // Refresh the view with new PRD data
+            } else {
+                addLog(`Error: ${data.message || 'Generation failed'}`);
+            }
+        }
+
+        function addLog(msg) {
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+            const logs = document.getElementById('logs');
+            logs.prepend(div);
+        }
+
+        const ws = new WebSocket(`ws://${window.location.host}`);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'status_update' && data.projectId === currentProjectId) {
+                const p = data.payload;
+                if (p.status) document.getElementById('statusVal').innerText = p.status;
+                if (p.iteration) document.getElementById('iterVal').innerText = `${p.iteration} / 100`;
+                if (p.currentTask) document.getElementById('taskVal').innerText = p.currentTask;
+                if (p.message) addLog(p.message);
+
+                // Real-time task list update
+                if (p.prd) {
+                    const pIndex = projects.findIndex(x => x.id === currentProjectId);
+                    if (pIndex > -1) projects[pIndex].prd = p.prd; // Keep local state in sync
+                    renderTaskList(p);
+                }
+            }
+        };
+
+        loadProjects();
+    </script>
+</body>
+
+</html>
