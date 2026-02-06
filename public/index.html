@@ -144,6 +144,36 @@
             font-weight: 600;
         }
 
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .tab.active {
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .log-container {
             background: rgba(15, 23, 42, 0.5);
             border-radius: 1rem;
@@ -194,6 +224,37 @@
             border-radius: 0.5rem;
             box-sizing: border-box;
         }
+
+        .story-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .story-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .story-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lesson-item {
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 3px solid var(--error);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
     </style>
 </head>
 
@@ -215,18 +276,6 @@
             </div>
         </header>
 
-        <!-- New PRD Generator Section -->
-        <div class="card"
-            style="margin-bottom: 1rem; border-color: var(--accent); background: rgba(56, 189, 248, 0.05);">
-            <h2 style="color: var(--accent);">AI PRD Generator</h2>
-            <div style="display: flex; gap: 1rem;">
-                <input type="text" id="prdPrompt"
-                    placeholder="Describe your project (e.g. 'A weather app with unit conversion')"
-                    style="margin-bottom: 0; flex-grow: 1;">
-                <button class="btn-init" onclick="generatePRD()" style="white-space: nowrap;">Generate JSON PRD</button>
-            </div>
-        </div>
-
         <div class="grid">
             <div class="card">
                 <h2>Status</h2>
@@ -240,19 +289,95 @@
                 <h2>Task</h2>
                 <div id="taskVal" class="value">N/A</div>
             </div>
-        </div>
-
-        <!-- Task List Section -->
-        <div class="card" style="margin-bottom: 2rem;">
-            <h2>Project Plan (Stories)</h2>
-            <div id="taskList" style="margin-top: 1rem;">
-                <div style="color: var(--text-dim); font-style: italic;">No tasks found. Generate a PRD first.</div>
+            <div class="card" style="border-color: var(--accent);">
+                <h2>Mobile Control</h2>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="checkbox" id="projHumanReview" onchange="saveProjectSettings()">
+                    <label style="font-size: 0.7rem; color: var(--text-dim);">Human Review</label>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Live Feed</h2>
-            <div id="logs" class="log-container"></div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('plan')">Project Plan</div>
+            <div class="tab" onclick="switchTab('knowledge')">Knowledge Base</div>
+            <div class="tab" onclick="switchTab('logs-tab')">Live Feed</div>
+            <div class="tab" onclick="switchTab('settings-tab')">Settings</div>
+        </div>
+
+        <!-- Tab: Project Plan -->
+        <div id="plan" class="tab-content active">
+            <div class="card"
+                style="margin-bottom: 1rem; border-color: var(--accent); background: rgba(56, 189, 248, 0.05);">
+                <h2 style="color: var(--accent);">AI PRD Generator</h2>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="prdPrompt"
+                        placeholder="Describe your project (e.g. 'A weather app with unit conversion')"
+                        style="margin-bottom: 0; flex-grow: 1;">
+                    <button class="btn-init" onclick="generatePRD()" style="white-space: nowrap;">Generate JSON
+                        PRD</button>
+                </div>
+            </div>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Stories</h2>
+                    <button class="story-btn" style="background: var(--success);" onclick="savePrdChanges()">Save
+                        Changes</button>
+                </div>
+                <div id="taskList"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Knowledge Base -->
+        <div id="knowledge" class="tab-content">
+            <div class="card">
+                <h2>Lessons Learned</h2>
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Ralph avoids making these
+                    mistakes again.</p>
+                <div id="lessonsList"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Logs -->
+        <div id="logs-tab" class="tab-content">
+            <div class="card">
+                <h2>Live Feed</h2>
+                <div id="logs" class="log-container"></div>
+            </div>
+        </div>
+        <!-- Tab: Settings -->
+        <div id="settings-tab" class="tab-content">
+            <div class="card">
+                <h2>Global Settings</h2>
+                <div style="display: grid; gap: 1rem; max-width: 500px;">
+                    <div>
+                        <label>Initial Sleep Time (ms)</label>
+                        <input type="number" id="setSleep" onchange="saveGlobalSettings()">
+                    </div>
+                    <div style="border-top: 1px solid #334155; padding-top: 1rem; margin-top: 1rem;">
+                        <h3 style="color: var(--accent);">Telegram Integration</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem;">Enable mobile
+                            notifications and human-in-the-loop review.</p>
+
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="checkbox" id="tgEnabled" onchange="saveGlobalSettings()">
+                            <label for="tgEnabled">Enable Telegram Bot</label>
+                        </div>
+
+                        <label>Bot Token</label>
+                        <input type="password" id="tgToken" placeholder="123456:ABC-DEF..."
+                            onchange="saveGlobalSettings()">
+
+                        <label>Chat ID</label>
+                        <input type="text" id="tgChatId" placeholder="e.g. 987654321" onchange="saveGlobalSettings()">
+
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                            <input type="checkbox" id="tgGlobHuman" onchange="saveGlobalSettings()">
+                            <label for="tgGlobHuman">Global Human Review (Default for all projects)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -276,11 +401,55 @@
     <script>
         let currentProjectId = null;
         let projects = [];
+        let lessons = [];
 
         async function loadProjects() {
             const res = await fetch('/api/projects');
             projects = await res.json();
             renderProjectList();
+        }
+
+        async function loadLessons() {
+            const res = await fetch('/api/lessons');
+            lessons = await res.json();
+            renderLessonsList();
+        }
+
+        async function switchTab(id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[onclick="switchTab('${id}')"]`).classList.add('active');
+            document.getElementById(id).classList.add('active');
+            if (id === 'knowledge') loadLessons();
+            if (id === 'settings-tab') loadSettings();
+        }
+
+        async function loadSettings() {
+            const res = await fetch('/api/settings');
+            const s = await res.json();
+            document.getElementById('setSleep').value = s.baseSleepTime;
+            document.getElementById('tgEnabled').checked = s.telegramSettings?.enabled;
+            document.getElementById('tgToken').value = s.telegramSettings?.botToken || '';
+            document.getElementById('tgChatId').value = s.telegramSettings?.chatId || '';
+            document.getElementById('tgGlobHuman').checked = s.telegramSettings?.useHumanReview;
+        }
+
+        async function saveGlobalSettings() {
+            const settings = {
+                baseSleepTime: parseInt(document.getElementById('setSleep').value),
+                telegramSettings: {
+                    enabled: document.getElementById('tgEnabled').checked,
+                    botToken: document.getElementById('tgToken').value,
+                    chatId: document.getElementById('tgChatId').value,
+                    useHumanReview: document.getElementById('tgGlobHuman').checked
+                }
+            };
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+            addLog("Global settings saved.");
         }
 
         function renderProjectList() {
@@ -299,35 +468,116 @@
             document.getElementById('mainView').style.display = 'block';
             document.getElementById('viewTitle').innerText = p.name;
             document.getElementById('statusVal').innerText = p.status;
+
+            // Set Human Review toggle
+            document.getElementById('projHumanReview').checked = p.useHumanReview || false;
+
             renderProjectList();
-            renderTaskList(p);
+            renderStagesList(p);
         }
 
-        function renderTaskList(project) {
+        async function saveProjectSettings() {
+            const val = document.getElementById('projHumanReview').checked;
+            await fetch(`/api/projects/${currentProjectId}/update-settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ updates: { useHumanReview: val } })
+            });
+            addLog(`Mobile Human Review ${val ? 'ENABLED' : 'DISABLED'} for this project.`);
+        }
+
+        function renderStagesList(project) {
             const container = document.getElementById('taskList');
-            if (!project.prd || !project.prd.stories || project.prd.stories.length === 0) {
-                container.innerHTML = '<div style="color: var(--text-dim); font-style: italic;">No tasks found. Generate a PRD first.</div>';
+            if (!project.prd || !project.prd.stages || project.prd.stages.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-dim); font-style: italic;">No stages found. Generate a Stage-based PRD first.</div>';
                 return;
             }
 
-            container.innerHTML = project.prd.stories.map(s => `
-                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${s.passes ? 'var(--success)' : '#334155'};"></div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: 600; font-size: 0.9rem; color: ${s.passes ? 'var(--success)' : 'white'}">${s.title}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-dim);">${s.description}</div>
+            container.innerHTML = project.prd.stages.map((stage, sIdx) => `
+                <div class="stage-container" style="margin-bottom: 2rem; border-left: 2px solid ${stage.isCompleted ? 'var(--success)' : 'var(--accent)'}; padding-left: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="margin: 0; color: ${stage.isCompleted ? 'var(--success)' : 'var(--accent)'};">${stage.name}</h3>
+                            <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem;">Goal: ${stage.mission}</div>
+                        </div>
+                        <div style="font-size: 0.7rem; font-weight: 800; color: ${stage.isCompleted ? 'var(--success)' : 'var(--text-dim)'}">${stage.isCompleted ? 'STAGE COMPLETE' : 'IN PROGRESS'}</div>
                     </div>
-                    <div style="font-size: 0.7rem; font-weight: 800; color: ${s.passes ? 'var(--success)' : 'var(--text-dim)'}">${s.passes ? 'DONE' : 'PENDING'}</div>
+                    ${stage.stories.map((s, tIdx) => `
+                        <div class="story-item" style="opacity: ${s.isSkipped ? '0.6' : '1'}">
+                            <div class="story-actions">
+                                <button class="story-btn" onclick="moveTask(${sIdx}, ${tIdx}, -1)">↑</button>
+                                <button class="story-btn" onclick="moveTask(${sIdx}, ${tIdx}, 1)">↓</button>
+                                <button class="story-btn" style="color: var(--error);" onclick="removeTask(${sIdx}, ${tIdx})">✕</button>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: ${s.passes ? 'var(--success)' : (s.isSkipped ? 'var(--error)' : '#334155')}; margin-top: 0.3rem;"></div>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: ${s.passes ? 'var(--success)' : (s.isSkipped ? 'var(--error)' : 'white')}">
+                                        ${s.title} ${s.priority === 'critical' ? '<span style="color: var(--error); font-size: 0.6rem;">[CRITICAL]</span>' : ''}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-dim);">${s.description}</div>
+                                    ${s.isSkipped ? `<div style="font-size: 0.7rem; color: var(--error); margin-top: 0.3rem; font-style: italic;">Skipped: ${s.skipReason || 'Non-critical failure'}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `).join('');
+        }
+
+        function renderLessonsList() {
+            const container = document.getElementById('lessonsList');
+            if (lessons.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-dim);">No lessons learned yet.</p>';
+                return;
+            }
+            container.innerHTML = lessons.map(l => `
+                <div class="lesson-item">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="font-weight: 600; font-size: 0.9rem;">${l.task}</div>
+                        <button class="story-btn" style="color: var(--error);" onclick="deleteLesson('${l.timestamp}')">✕</button>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">${l.error}</div>
+                    <div style="font-size: 0.7rem; color: var(--accent); margin-top: 0.5rem;">${new Date(l.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function savePrdChanges() {
+            const p = projects.find(x => x.id === currentProjectId);
+            const res = await fetch(`/api/projects/${currentProjectId}/update-prd`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prd: p.prd })
+            });
+            if (res.ok) addLog("Project Plan (Stages & Stories) updated and saved.");
+        }
+
+        function moveTask(sIdx, tIdx, dir) {
+            const p = projects.find(x => x.id === currentProjectId);
+            const stories = p.prd.stages[sIdx].stories;
+            if (tIdx + dir < 0 || tIdx + dir >= stories.length) return;
+            const temp = stories[tIdx];
+            stories[tIdx] = stories[tIdx + dir];
+            stories[tIdx + dir] = temp;
+            renderStagesList(p);
+        }
+
+        function removeTask(sIdx, tIdx) {
+            const p = projects.find(x => x.id === currentProjectId);
+            p.prd.stages[sIdx].stories.splice(tIdx, 1);
+            renderStagesList(p);
+        }
+
+        async function deleteLesson(timestamp) {
+            await fetch(`/api/lessons/${timestamp}`, { method: 'DELETE' });
+            loadLessons();
         }
 
         async function createProject() {
             const name = document.getElementById('pName').value;
             const prdRaw = document.getElementById('pPrd').value || '{"stories":[]}';
-
             if (!name) return alert("Please enter a project name");
-
             try {
                 const res = await fetch('/api/projects', {
                     method: 'POST',
@@ -350,8 +600,7 @@
             if (!currentProjectId) return;
             const prompt = document.getElementById('prdPrompt').value;
             if (!prompt) return alert("Please enter a description");
-
-            addLog("AI is generating PRD... Deep thinking active.");
+            addLog("AI is generating PRD... Processing...");
             const res = await fetch(`/api/projects/${currentProjectId}/generate-prd`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -361,7 +610,7 @@
             if (data.status === 'prd_generated') {
                 addLog("PRD Generated successfully!");
                 await loadProjects();
-                selectProject(currentProjectId); // Refresh the view with new PRD data
+                selectProject(currentProjectId);
             } else {
                 addLog(`Error: ${data.message || 'Generation failed'}`);
             }
@@ -384,12 +633,12 @@
                 if (p.iteration) document.getElementById('iterVal').innerText = `${p.iteration} / 100`;
                 if (p.currentTask) document.getElementById('taskVal').innerText = p.currentTask;
                 if (p.message) addLog(p.message);
-
-                // Real-time task list update
                 if (p.prd) {
                     const pIndex = projects.findIndex(x => x.id === currentProjectId);
-                    if (pIndex > -1) projects[pIndex].prd = p.prd; // Keep local state in sync
-                    renderTaskList(p);
+                    if (pIndex > -1) {
+                        projects[pIndex].prd = p.prd;
+                        renderStagesList(projects[pIndex]);
+                    }
                 }
             }
         };

@@ -1,146 +1,1044 @@
 {
   "projects": [
     {
-      "id": "proje_1_oyun",
-      "name": "proje_1_oyun",
-      "path": "/Users/muharremdedeoglu/Development/Ralp-pipeline-2/ralph-pipeline-manager/proje_1_oyun",
+      "id": "MindVault",
+      "name": "MindVault",
+      "path": "/Users/muharremdedeoglu/ralph2/projects/MindVault",
       "prd": {
-        "project": "Cube Dash 3D",
-        "description": "Build a small but complete web-based 3D endless runner/dodge game using Three.js in a single HTML file. The player controls a cube moving left/right to avoid incoming obstacles, with score increasing over survival time, progressive difficulty, basic audio feedback, and a polished but simple visual style.",
-        "stories": [
+        "project": "MindVault",
+        "description": "Stage-based Node.js Express journey with atomic stories for core setup, CRUD logic with security validation, and a simple UI plus analytics.",
+        "stages": [
           {
-            "title": "Define Single-File Game Architecture",
-            "description": "Create one self-contained HTML file with embedded CSS and JavaScript. Include Three.js latest stable CDN import, initialize global game state, and structure code into clear beginner-friendly functions such as init, animate, handleInput, spawnObstacle, updateObstacles, detectCollision, updateScore, setGameOver, and restartGame.",
-            "passes": false
+            "name": "Stage 1: Build Core",
+            "mission": "Establish the foundational server and storage utilities needed for later features.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Initialize Express server",
+                "description": "Set up a basic Node.js Express app with a health check route and configurable port.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create JSON file storage utility",
+                "description": "Implement a reusable module to read/write notes to a JSON file with safe initialization.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
           },
           {
-            "title": "Initialize 3D Scene and Rendering Pipeline",
-            "description": "Set up Three.js scene, perspective camera, and renderer. Configure renderer sizing, pixel ratio, and append canvas to the document. Implement responsive resize handling to maintain correct aspect ratio and viewport behavior.",
-            "passes": false
+            "name": "Stage 2: Logic",
+            "mission": "Deliver complete Note CRUD and a robust security validator for sensitive content detection.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Define Note model shape",
+                "description": "Specify required fields for a Note (id, title, content, timestamps) and validation rules.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Create Note endpoint",
+                "description": "Add POST /notes with input validation and persistence via JSON storage.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Read Notes endpoints",
+                "description": "Add GET /notes and GET /notes/:id with proper error handling.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Update Note endpoint",
+                "description": "Add PUT /notes/:id to update title/content with validation and persistence.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Delete Note endpoint",
+                "description": "Add DELETE /notes/:id to remove notes and return appropriate status.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Research credit card detection patterns",
+                "description": "Gather rules for identifying common credit card formats (lengths, prefixes, Luhn check).",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Build Luhn checksum helper",
+                "description": "Create a helper function that validates numeric strings using the Luhn algorithm.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create candidate extractor for note content",
+                "description": "Parse note text to extract potential card number sequences with separators and spacing.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Security Validator function",
+                "description": "Combine extraction, pattern checks, and Luhn validation to flag credit card numbers.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Integrate Security Validator into CRUD",
+                "description": "Run validation on create/update and return a structured warning response when flagged.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
           },
           {
-            "title": "Implement Lighting and Environment",
-            "description": "Add ambient and directional lights for clear visibility and depth. Create a ground plane with a colorful but clean material. Ensure scene composition is visually simple, readable, and polished.",
-            "passes": false
-          },
-          {
-            "title": "Create Player Cube with Smooth Movement",
-            "description": "Add a player cube mesh with colorful material. Implement lane-based or bounded horizontal movement using ArrowLeft/ArrowRight and A/D keys. Use lerp-based smoothing so movement feels fluid rather than instant.",
-            "passes": false
-          },
-          {
-            "title": "Build Obstacle Spawning System",
-            "description": "Generate obstacles at random horizontal positions ahead of the player and move them toward the camera/player over time. Manage obstacle lifecycle by removing off-screen objects to avoid memory/performance issues.",
-            "passes": false
-          },
-          {
-            "title": "Add Collision Detection and Failure Logic",
-            "description": "Detect overlap between player and obstacles using bounding checks (e.g., Box3 or simplified AABB). Trigger game-over state immediately on collision, halt active gameplay updates, and present restart prompt.",
-            "passes": false
-          },
-          {
-            "title": "Implement Score and Difficulty Progression",
-            "description": "Increase score continuously based on survival time and display it in real time. Scale difficulty over time by increasing obstacle speed and/or spawn frequency while keeping progression smooth and fair.",
-            "passes": false
-          },
-          {
-            "title": "Deliver Game State Management and Restart Flow",
-            "description": "Support at least two states: playing and game over. On restart input (e.g., R key or Enter), reset score, timers, obstacle arrays, player position, speed scaling, and UI state without reloading the page.",
-            "passes": false
-          },
-          {
-            "title": "Implement HTML Overlay UI",
-            "description": "Create lightweight HTML overlay for score and game-over text above the WebGL canvas. Ensure clear typography, contrast, and placement. Show/hide messages based on game state transitions.",
-            "passes": false
-          },
-          {
-            "title": "Add Simple Animations for Visual Polish",
-            "description": "Introduce subtle animation effects such as obstacle rotation, player bounce/tilt, or scene motion accents. Keep animations lightweight and readable to maintain beginner-friendly code and stable performance.",
-            "passes": false
-          },
-          {
-            "title": "Integrate Basic Sound Effects with Web Audio API",
-            "description": "Use Web Audio API to synthesize simple SFX (e.g., movement blip, score tick cadence, collision/game-over tone). Ensure audio initialization complies with browser gesture requirements and does not require external audio files.",
-            "passes": false
-          },
-          {
-            "title": "Enforce Code Quality and Delivery Requirements",
-            "description": "Comment key logic clearly, keep naming and function boundaries clean, and maintain readability for beginners. Ensure final output is a fully working standalone HTML game with no external frameworks beyond Three.js CDN.",
-            "passes": false
+            "name": "Stage 3: UI & Extra",
+            "mission": "Provide a minimal dashboard to view notes and add optional analytics.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Create HTML dashboard",
+                "description": "Serve a simple HTML page that lists notes and allows refresh of note data.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Wire dashboard to notes API",
+                "description": "Fetch notes from the API and render them in the dashboard using basic client-side JS.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Advanced Analytics: Word frequency",
+                "description": "Compute word frequency across all notes and expose it via an endpoint for optional UI use.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
           }
         ]
       },
       "status": "completed",
-      "createdAt": "2026-02-05T23:19:25.739Z",
-      "updatedAt": "2026-02-05T23:57:28.757Z"
+      "createdAt": "2026-02-06T07:33:49.054Z",
+      "updatedAt": "2026-02-06T08:19:56.825Z",
+      "useHumanReview": false,
+      "iteration": 10
     },
     {
-      "id": "Dice_game",
-      "name": "Dice_game",
-      "path": "/Users/muharremdedeoglu/Development/Ralp-pipeline-2/ralph-pipeline-manager/projects/Dice_game",
+      "id": "Finance Dashboard",
+      "name": "Finance Dashboard",
+      "path": "/Users/muharremdedeoglu/ralph2/projects/Finance Dashboard",
       "prd": {
-        "project": "Web-Based 3D Dice Roller (Three.js, Single-File)",
-        "description": "Build a beginner-friendly, single-file HTML application that renders a procedural 3D dice on a table using Three.js and allows users to roll it via button click or Space key. The dice should animate with smooth, physical-feeling motion, then stop on a valid randomly selected face (1-6) and display the result clearly in the UI.",
-        "stories": [
+        "project": "Crypto Portfolio Tracker",
+        "description": "Create a premium Crypto Portfolio Tracker with a high-end dark glassmorphism UI, real-time prices from a public API, mock holdings management, and Chart.js portfolio distribution. Emphasize neon accents, smooth transitions, and mobile responsiveness.",
+        "stages": [
           {
-            "title": "Initialize single-file app with Three.js from CDN",
-            "description": "Create one self-contained HTML file using pure HTML, CSS, and vanilla JavaScript. Load latest stable Three.js from CDN. Do not use frameworks or external assets.",
-            "passes": true
+            "name": "Stage 1: Build Core",
+            "mission": "Establish the foundational app structure, data flow, and price fetching.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Define data models",
+                "description": "Create TypeScript interfaces or JS schemas for assets, holdings, and portfolio summary to standardize state and API responses.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Set up price service",
+                "description": "Implement a price-fetching module using a public crypto API with caching and error handling.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Wire app state",
+                "description": "Create global state or store for holdings, prices, and derived portfolio metrics.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create base layout",
+                "description": "Build the main page scaffold with sections for holdings, totals, and chart area.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
           },
           {
-            "title": "Set up core 3D scene",
-            "description": "Implement scene, perspective camera, and WebGL renderer. Add responsive canvas behavior that resizes with the window. Keep OrbitControls optional and only include if it does not add complexity.",
-            "passes": true
+            "name": "Stage 2: Holdings Workflow",
+            "mission": "Enable users to add and manage mock holdings with live valuation.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Add holding form",
+                "description": "Build a form to add mock holdings (asset, amount) with validation.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Holdings list",
+                "description": "Render a holdings list with live price, value, and percentage of portfolio.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Edit and remove holdings",
+                "description": "Allow users to update or delete holdings and reflect changes instantly.",
+                "passes": false,
+                "priority": "standard",
+                "isSkipped": true,
+                "skipReason": "**Findings**\n- `medium` Tracking artifact claim is incorrect. `progress.txt:2` is `Running AI for: N/A`, but the reviewed output claims `PROMISE_MET` was written there. This is a concrete repo-state mismatch that blocks sign-off of the stated delivery.\n\n**Criteria Check**\n1. Stage mission alignment: `yes` (edit/remove controls and workflow wiring are present in `app.js:846`, `app.js:912`, `index.html:61`, `styles.css:224`, `styles.css:326`).\n2. Story completion (“Edit and remove holdings”): `yes` from code inspection (edit mode, save, cancel, remove, and stale-edit guard are implemented).\n3. No obvious bugs/syntax/broken logic: `mostly yes` (`node --check app.js` passes; no obvious break in edit/remove flow), with the artifact mismatch above still requiring correction.\n\nSpecific technical feedback for developer: update `progress.txt:2` to match the claimed tracking state (`Running AI for: PROMISE_MET`) before this can be marked as fully consistent."
+              },
+              {
+                "title": "Portfolio totals",
+                "description": "Compute and display total portfolio value and 24h change if available.",
+                "passes": false,
+                "priority": "standard",
+                "isSkipped": true,
+                "skipReason": "**Findings (ordered by severity)**  \n1. `medium` Claimed tracking artifact update is not present in repo state.  \n- `progress.txt:2` is still `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the output claim (“Rewrote `progress.txt` and set line 2 to `PROMISE_MET`).\n\n**Criteria assessment**  \n1. Stage mission alignment: `yes` (portfolio totals wiring and 24h fallback behavior are implemented).  \n2. Story completion (“Portfolio totals”): `mostly yes` from code/path checks (`index.html` total IDs and `app.js` render/summary logic align).  \n3. No obvious bugs/syntax errors/broken logic: `yes` for this story scope (`node --check app.js` passes; 24h `N/A` fallback is coherent).\n\n**Required fix before sign-off**  \n- Update `progress.txt:2` to exactly: `Running AI for: PROMISE_MET` and re-submit with that file state."
+              }
+            ]
           },
           {
-            "title": "Create procedural table environment",
-            "description": "Add a subtle-colored ground plane to represent a table. Configure ambient and directional lighting with shadows enabled so the dice casts a visible shadow.",
-            "passes": true
+            "name": "Stage 3: Visualization",
+            "mission": "Present portfolio distribution with Chart.js and smooth transitions.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Integrate Chart.js",
+                "description": "Add Chart.js and create a doughnut or pie chart for allocation.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Bind chart to state",
+                "description": "Update chart data reactively based on holdings and prices.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Animate chart updates",
+                "description": "Enable smooth transitions for chart updates and initial render.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
           },
           {
-            "title": "Build procedural dice model without textures/models",
-            "description": "Create a cube-based dice with white body and dark pips, fully generated in code. Implement pips using either CanvasTexture per face or pip meshes placed on faces.",
-            "passes": true
+            "name": "Stage 4: Premium UI",
+            "mission": "Deliver the dark glassmorphism look with neon accents and refined motion.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Apply glassmorphism theme",
+                "description": "Implement frosted glass panels, blur, and layered depth on key containers.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Neon accent system",
+                "description": "Define neon accent colors and apply to highlights, buttons, and charts.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Smooth transitions",
+                "description": "Add transitions for hover states, card reveals, and data updates.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
           },
           {
-            "title": "Implement roll interaction controls",
-            "description": "Add HTML overlay UI with a 'ROLL' button and keyboard shortcut (Space) to trigger rolling. Prevent repeated roll input while an active roll animation is in progress.",
-            "passes": true
-          },
-          {
-            "title": "Animate dice roll with physical feel",
-            "description": "Implement roll animation with easing (damped/tween-like interpolation), including a subtle shake or bounce effect to improve perceived realism.",
-            "passes": true
-          },
-          {
-            "title": "Ensure valid deterministic final face result",
-            "description": "On each roll, randomly select an integer 1-6, animate motion, and smoothly snap dice orientation so the selected face is clearly up at animation end. Ensure final state is valid and unambiguous.",
-            "passes": true
-          },
-          {
-            "title": "Display result and rolling status",
-            "description": "Show 'Result: X' text that updates after each completed roll and a subtle status indicator such as 'Rolling...' while animation is active.",
-            "passes": true
-          },
-          {
-            "title": "Organize code for readability and maintainability",
-            "description": "Structure implementation into beginner-friendly functions such as init(), createDice(), rollDice(), animate(), and setDiceToFace(n). Add clear comments on key logic paths.",
-            "passes": true
-          },
-          {
-            "title": "Validate final output constraints",
-            "description": "Confirm deliverable is only one fully working HTML file with no external assets, no frameworks, and behavior that matches all scene, interaction, animation, and UI requirements.",
-            "passes": true
+            "name": "Stage 5: Responsive Polish",
+            "mission": "Ensure mobile-first usability and performance reliability.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Mobile layout pass",
+                "description": "Optimize layout for small screens with stacked sections and touch-friendly controls.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Loading and error states",
+                "description": "Add graceful loading indicators and API error messaging.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Performance check",
+                "description": "Verify API polling interval, minimize rerenders, and avoid layout thrash.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
           }
         ]
       },
       "status": "completed",
-      "createdAt": "2026-02-06T00:18:33.564Z",
-      "updatedAt": "2026-02-06T00:31:29.241Z"
+      "createdAt": "2026-02-06T08:43:13.041Z",
+      "updatedAt": "2026-02-06T11:26:03.981Z",
+      "useHumanReview": false,
+      "iteration": 35
+    },
+    {
+      "id": "TD1",
+      "name": "TD1",
+      "path": "/Users/muharremdedeoglu/ralph2/projects/TD1",
+      "prd": {
+        "project": "Premium Three.js Tower Defense (Vite + TypeScript)",
+        "description": "Stage-based delivery plan to build a polished, deterministic, web-based Tower Defense game with strong architecture, performance, UX, visual/audio polish, testing, and progression.",
+        "stages": [
+          {
+            "name": "Stage 1: Build Core",
+            "mission": "Establish a production-grade foundation that runs locally, compiles strictly, and supports deterministic fixed-timestep simulation.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Initialize Vite + TypeScript ESM project",
+                "description": "Create the base repo with npm scripts, TypeScript config, and browser entrypoint.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Enable strict TypeScript and lint/format pipeline",
+                "description": "Configure strict tsconfig, ESLint, and Prettier with zero-warning baseline.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create deterministic RNG service",
+                "description": "Implement seed-based random utility and inject it into simulation systems.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement fixed timestep loop (60 Hz) with interpolation",
+                "description": "Separate simulation tick from render frame and add interpolation alpha for smooth visuals.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Define modular system architecture",
+                "description": "Create clean boundaries for Simulation, Rendering, Input, UI, Audio, and Data modules.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Set up data-driven config layer",
+                "description": "Add typed config files for towers, enemies, waves, economy, and difficulty scaling.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add core test harness with Vitest",
+                "description": "Configure unit test runner and create first deterministic simulation tests.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 2: Playable Loop",
+            "mission": "Deliver a complete playable tower defense loop with pathing, combat, waves, economy, and lose/win conditions.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Implement map grid and enemy pathing",
+                "description": "Create grid/spline path definitions and enemy movement along authored routes.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Build tower placement and validation",
+                "description": "Add tile hover, valid/invalid placement feedback, and placement confirmation flow.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Basic DPS tower",
+                "description": "Create targeting, projectile/hitscan logic, cooldown timing, and damage application.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Splash tower",
+                "description": "Add area damage calculations and impact radius visualization.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Slow/Freeze tower",
+                "description": "Apply timed movement debuffs with stacking/refresh rules.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Sniper tower",
+                "description": "Add long-range high-damage behavior with slower fire cadence.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create enemy archetypes",
+                "description": "Implement fast, tank, shielded, and boss enemies with unique stats/behaviors.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement boss phase logic",
+                "description": "Create boss state transitions by HP thresholds and phase-specific modifiers.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Create wave spawning system",
+                "description": "Implement scalable wave definitions, timings, and completion checks.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add elite modifiers",
+                "description": "Apply optional per-wave enemy buffs (speed, armor, regeneration, etc.).",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Implement currency and reward flow",
+                "description": "Grant currency on kills/wave clear and spend on tower placement/upgrades.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement tower upgrade system",
+                "description": "Support damage, range, fire rate, and special ability upgrade tracks.",
+                "passes": false,
+                "priority": "critical"
+              },
+              {
+                "title": "Add game state transitions",
+                "description": "Handle start, pause, wave start/end, game over, and victory states.",
+                "passes": false,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 3: Visual & Feel Polish",
+            "mission": "Elevate presentation to premium indie/AA quality with polished rendering, feedback, and camera controls.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Build top-down camera controller",
+                "description": "Implement smooth pan/zoom and optional orbit constraints for tactical readability.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add responsive input mapping",
+                "description": "Support mouse and keyboard controls with clear interaction states.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Apply PBR-style materials",
+                "description": "Use MeshStandardMaterial and tuned material presets for towers, terrain, and enemies.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement environment lighting and soft shadows",
+                "description": "Configure procedural lighting setup and shadow quality/performance settings.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add post-processing chain",
+                "description": "Integrate Bloom, SSAO, Vignette, and subtle chromatic aberration.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement particle FX system",
+                "description": "Create pooled particles for muzzle flashes, impacts, explosions, and kill bursts.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement hit-stop and screen shake",
+                "description": "Add impact-driven temporal slowdown and camera shake with intensity scaling.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add easing-based UI/world animations",
+                "description": "Animate tower selection, placement confirmation, and wave transitions with smooth easing.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Implement hover and selection feedback",
+                "description": "Show outlines/range rings/reticles and contextual highlights for interactions.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 4: UX, Menus, and Audio",
+            "mission": "Deliver complete in-game UX, menu flows, and clear audio feedback across all key events.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Create modern overlay HUD",
+                "description": "Build responsive HTML/CSS UI for health, currency, wave info, and action buttons.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement main menu",
+                "description": "Add start flow, settings entrypoints, and polished transitions.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement pause menu",
+                "description": "Support pause/resume/restart with simulation freeze and UI state sync.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement game over and victory screens",
+                "description": "Create end-state summaries, score display, and replay actions.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add tower tooltips and iconography",
+                "description": "Display tower stats, upgrade deltas, and concise descriptions with visual clarity.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement WebAudio mixer",
+                "description": "Create master/music/sfx buses and runtime volume controls.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Generate procedural SFX",
+                "description": "Synthesize key event sounds when asset files are unavailable.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Add spatialized gameplay audio",
+                "description": "Apply positional audio cues for impacts, tower firing, and major enemy events.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Wire event audio feedback",
+                "description": "Play distinct sounds for placement, hits, kills, and wave start/end.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 5: Performance, Persistence, and Quality Gates",
+            "mission": "Harden runtime performance, save progression, and ship with tests plus smoke validation.",
+            "isCompleted": false,
+            "stories": [
+              {
+                "title": "Introduce object pooling",
+                "description": "Pool projectiles, particles, and transient effects to reduce GC spikes.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Use instanced meshes for repeated units",
+                "description": "Batch render repeated enemies/props with instance transforms and per-instance data.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add frustum culling strategy",
+                "description": "Avoid rendering off-screen objects and tune culling behavior for gameplay camera.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Reduce per-frame allocations",
+                "description": "Refactor hot paths to reuse vectors/arrays and avoid transient object churn.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement LocalStorage save system",
+                "description": "Persist currency, upgrades, and high scores with schema versioning.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add balance and scaling controls",
+                "description": "Expose tunable formulas and default values for difficulty ramp and economy pacing.",
+                "passes": false,
+                "priority": "critical"
+              },
+              {
+                "title": "Expand unit tests for core systems",
+                "description": "Add focused tests for RNG determinism, combat math, wave scheduler, and upgrades.",
+                "passes": false,
+                "priority": "critical"
+              },
+              {
+                "title": "Add Playwright smoke test",
+                "description": "Verify app boot, menu navigation, and entering a playable game state.",
+                "passes": false,
+                "priority": "standard"
+              },
+              {
+                "title": "Prepare final developer documentation",
+                "description": "Document project tree, setup/run steps, architecture rationale, and file-by-file source expectations.",
+                "passes": false,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 6: Optional Premium Extras",
+            "mission": "Add high-value optional features that increase delight without destabilizing the core game.",
+            "isCompleted": false,
+            "stories": [
+              {
+                "title": "Implement mini map",
+                "description": "Render tactical mini map showing paths, tower positions, and enemy progress.",
+                "passes": false,
+                "priority": "standard"
+              },
+              {
+                "title": "Add damage numbers",
+                "description": "Show floating combat text with lightweight pooled rendering.",
+                "passes": false,
+                "priority": "standard"
+              },
+              {
+                "title": "Implement combo/streak system",
+                "description": "Track kill chains and grant score/currency bonuses with decay timing.",
+                "passes": false,
+                "priority": "standard"
+              },
+              {
+                "title": "Add subtle environment animation",
+                "description": "Introduce wind sway/moving props to enhance scene liveliness.",
+                "passes": false,
+                "priority": "standard"
+              },
+              {
+                "title": "Implement day/night tint shift",
+                "description": "Apply gradual lighting/post FX tint changes across match progression.",
+                "passes": false,
+                "priority": "standard"
+              }
+            ]
+          }
+        ]
+      },
+      "status": "initialized",
+      "createdAt": "2026-02-06T11:36:51.784Z",
+      "updatedAt": "2026-02-06T13:55:40.289Z",
+      "iteration": 66
+    },
+    {
+      "id": "Dice2",
+      "name": "Dice2",
+      "path": "/Users/muharremdedeoglu/ralph2/projects/Dice2",
+      "prd": {
+        "project": "3D Interactive Dice Roller",
+        "description": "A web-based 3D dice rolling application using Three.js and HTML. The application will feature a realistic 3D die model, physics-based animation for the roll, and a clean, responsive user interface for interaction.",
+        "stages": [
+          {
+            "name": "Stage 1: Build Core",
+            "mission": "Initialize the Three.js scene, create the 3D geometry for a standard six-sided die, and set up the basic render loop to display the object on the screen.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Setup HTML and CDN Dependencies",
+                "description": "Create the HTML structure and import Three.js from a CDN (e.g., unpkg or cdnjs). Ensure the canvas container is ready for rendering.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Initialize Three.js Scene",
+                "description": "Create the Scene, Camera, and Renderer. Add basic lighting (Ambient and Directional) to the scene.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Create 3D Die Geometry",
+                "description": "Generate a BoxGeometry for the die. Apply a standard material (MeshStandardMaterial) with a distinct color (e.g., white or ivory).",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Implement Render Loop",
+                "description": "Set up the animation loop using requestAnimationFrame to render the scene continuously.",
+                "passes": true,
+                "priority": "critical"
+              }
+            ]
+          },
+          {
+            "name": "Stage 2: Add Physics & Animation",
+            "mission": "Implement the logic to animate the die's rotation and position to simulate a physical roll, ensuring it lands on a random face.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Implement Physics Simulation Logic",
+                "description": "Create a function to calculate a random rotation vector (x, y, z) and a random velocity vector. This will drive the animation.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Add Animation Loop for Rotation",
+                "description": "Update the die's rotation in the render loop based on the calculated velocity. Add friction to slow the rotation down over time.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Implement Landing Detection",
+                "description": "Detect when the rotation speed drops to near zero. Snap the die to the nearest 90-degree angle to ensure the face is clearly visible.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
+          },
+          {
+            "name": "Stage 3: Polish & Interaction",
+            "mission": "Add user controls, visual feedback, and finalize the UI to make the tool intuitive and visually appealing.",
+            "isCompleted": true,
+            "stories": [
+              {
+                "title": "Add User Interaction (Button)",
+                "description": "Create a 'Roll' button in the HTML. When clicked, trigger the physics animation logic defined in Stage 2.",
+                "passes": true,
+                "priority": "critical"
+              },
+              {
+                "title": "Display Result",
+                "description": "Calculate which face is currently visible (based on rotation) and display the result number on the UI.",
+                "passes": true,
+                "priority": "standard"
+              },
+              {
+                "title": "Refine Visuals",
+                "description": "Add shadows, improve lighting, and ensure the camera angle provides a good perspective of the die.",
+                "passes": true,
+                "priority": "standard"
+              }
+            ]
+          }
+        ]
+      },
+      "status": "completed",
+      "createdAt": "2026-02-06T13:56:27.369Z",
+      "updatedAt": "2026-02-06T14:22:25.114Z",
+      "iteration": 10
+    }
+  ],
+  "lessons": [
+    {
+      "task": "Define Note model shape",
+      "error": "**Findings**\n1. Stage mission not fulfilled: there are no Note CRUD endpoints and no security/sensitive-content validator in the codebase. The server only exposes `/health` and no notes routes exist. See `src/server.js:1`. I also found no validator modules under `src/`. \n\n**Notes**\n- Story “Define Note model shape” appears complete: required fields and validators are defined in `src/models/note.js:1`.\n- No obvious syntax errors found.\n\n**Tests**\n- Not run (not requested).\n\nFeedback: Please add t",
+      "stage": "Stage 2: Logic",
+      "project": "MindVault",
+      "timestamp": "2026-02-06T08:01:16.664Z"
+    },
+    {
+      "task": "Implement Create Note endpoint",
+      "error": "**Findings**\n1. Stage mission not fulfilled: only `POST /notes` exists. No read/update/delete endpoints are present (`src/server.js`). You need at least GET/PUT/PATCH/DELETE to deliver full CRUD.\n2. “Robust” sensitive-content validator is likely incomplete: current validator only checks credit cards via Luhn and brand detection (`src/validators/sensitiveContent.js`). If the mission expects broader sensitive data detection (e.g., SSNs, bank accounts, API keys), this doesn’t meet “robust.”\n\n**Note",
+      "stage": "Stage 2: Logic",
+      "project": "MindVault",
+      "timestamp": "2026-02-06T08:04:41.960Z"
+    },
+    {
+      "task": "Implement Read Notes endpoints",
+      "error": "**Findings**\n1. Stage Mission not fulfilled: CRUD is incomplete. `src/server.js` only defines `POST /notes`, `GET /notes`, and `GET /notes/:id`. There are no update or delete endpoints (e.g., `PUT/PATCH /notes/:id`, `DELETE /notes/:id`). `src/server.js`.\n2. Stage Mission not fulfilled: the sensitive-content validator only detects credit cards via Luhn/brand checks and does not meet a “robust” standard (no SSN/bank/API key/passphrase detection). `src/validators/sensitiveContent.js`.\n\n**Story Chec",
+      "stage": "Stage 2: Logic",
+      "project": "MindVault",
+      "timestamp": "2026-02-06T08:06:15.361Z"
+    },
+    {
+      "task": "Implement Update Note endpoint",
+      "error": "**Findings**\n1. Blocker: CRUD is still incomplete. There is no `DELETE /notes/:id` route in `src/server.js`, so Stage 2 mission (“complete Note CRUD”) is not met.\n\n**Notes**\n- The `PUT /notes/:id` implementation in `src/server.js` looks correct for full updates (validates input, scans sensitive content, persists, 404s when missing).\n- The sensitive-content validator in `src/validators/sensitiveContent.js` is significantly broader than before and appears reasonable.\n\n**Tests**\n- Not run. There ar",
+      "stage": "Stage 2: Logic",
+      "project": "MindVault",
+      "timestamp": "2026-02-06T08:12:28.002Z"
+    },
+    {
+      "task": "Create HTML dashboard",
+      "error": "Summary: The HTML dashboard and notes refresh wiring are present and look correct. However, Stage 3’s mission includes “optional analytics,” which is not implemented yet, so the stage mission is not fully met.\n\nFindings:\n1. Stage mission not fully met: there is no word-frequency analytics endpoint or UI integration for analytics. The Stage 3 “Advanced Analytics: Word frequency” story is still marked `passes: false` in `plans/prd.json`, and there’s no analytics route in `src/server.js` nor UI sec",
+      "stage": "Stage 3: UI & Extra",
+      "project": "MindVault",
+      "timestamp": "2026-02-06T08:17:12.069Z"
+    },
+    {
+      "task": "Initialize App Shell",
+      "error": "Findings:\n1. `progress.txt` is missing the promised `PROMISE_MET` entry. The summary claims it was appended, but the file only contains the initial three lines. Please update `progress.txt` accordingly.\n\nNotes:\n- The UI shell (header/main/footer) in `index.html` aligns with the “Initialize App Shell” story, and no syntax issues were found.\n- The PRD story is already marked as `passes: true` in `plans/prd.json`, which is fine once the progress log mismatch is corrected.\n\nPlease address the progre",
+      "stage": "Stage 1: Build Core",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T08:46:25.720Z"
+    },
+    {
+      "task": "Set up price service",
+      "error": "**Findings**\n\n1. `high` Public API methods can throw raw `TypeError` instead of structured price-service errors on null inputs.\n- `app.js:319` destructures `resolveCoinGeckoIds({ assetIds = [], symbols = [] } = {})`; passing `null` crashes before validation.\n- `app.js:469` (`fetchPrices`) and `app.js:534` (`getCachedPrices`) pass caller input directly, so `fetchPrices(null)` / `getCachedPrices(null)` throw `Cannot read properties of null (reading 'assetIds')`.\n- `app.js:521` in `fetchPriceBySymb",
+      "stage": "Stage 1: Build Core",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:03:34.028Z"
+    },
+    {
+      "task": "Wire app state",
+      "error": "**Findings (ordered by severity)**\n\n1. `high` External callers can mutate internal store state through returned snapshots/metrics.\n- `app.js:736` returns `summary: state.summary` directly from `getState()`.\n- `app.js:703` returns `allocations: state.summary.allocations.slice()` in `getPortfolioMetrics()`, but allocation objects are still shared references.\n- `app.js:207` and `app.js:214` only shallow-freeze summary, so nested `allocations` data stays mutable.\n- Impact: consumers can corrupt stor",
+      "stage": "Stage 1: Build Core",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:11:22.865Z"
+    },
+    {
+      "task": "Create base layout",
+      "error": "1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` currently contains `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- This contradicts the reported output and means “aligned tracking artifacts” is not yet true.\n\nCriteria check:\n1. Stage mission alignment: `yes` (base structure + state/price-flow updates are present).\n2. Story completion (“Create base layout”): `yes` (totals, holdings, and chart scaffold are implemented in `index.html` and styled in `styles.css`).\n3.",
+      "stage": "Stage 1: Build Core",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:16:48.841Z"
+    },
+    {
+      "task": "Add holding form",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact is still incorrect vs. claimed output.\n- `progress.txt:2` is `Running AI for: N/A`.\n- The submitted output claims `PROMISE_MET` entries were written in `progress.txt:4` and `progress.txt:5`, but those lines do not exist in the current file.\n- This is a concrete mismatch between implementation claim and repository state.\n\nAssessment against criteria:\n\n1. Stage mission alignment: `yes` (the added form + submit flow + refresh wiring are",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:19:45.487Z"
+    },
+    {
+      "task": "Holdings list",
+      "error": "**Findings (ordered by severity)**  \n1. `medium` Tracking artifact claim is incorrect.  \n- `progress.txt:2` is `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- The output being reviewed explicitly claims `PROMISE_MET` is present, but the current file content does not support that claim.\n\n**Criteria assessment**  \n1. Stage mission alignment: `yes` (the implemented holdings flow supports adding holdings and live valuation plumbing).  \n2. Story completion (“Holdings list”): `yes` (list",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:25:11.442Z"
+    },
+    {
+      "task": "Edit and remove holdings",
+      "error": "**Findings**\n- `medium` Tracking artifact claim is incorrect. `progress.txt:2` is `Running AI for: N/A`, but the reviewed output claims `PROMISE_MET` was written there. This is a concrete repo-state mismatch that blocks sign-off of the stated delivery.\n\n**Criteria Check**\n1. Stage mission alignment: `yes` (edit/remove controls and workflow wiring are present in `app.js:846`, `app.js:912`, `index.html:61`, `styles.css:224`, `styles.css:326`).\n2. Story completion (“Edit and remove holdings”): `yes",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:30:35.348Z"
+    },
+    {
+      "task": "Portfolio totals",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact is still incorrect.\n- `progress.txt:2` is `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- This directly contradicts the claimed output and fails the stated tracking requirement.\n\n2. `medium` `N/A` fallback for unavailable 24h data is not reliably achievable with current model defaults.\n- `app.js:89` defaults `asset.change24hPercent` to `0` when missing.\n- `app.js:165` and `app.js:175` treat finite values (including that d",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:32:42.460Z"
+    },
+    {
+      "task": "Portfolio totals",
+      "error": "**Findings (ordered by severity)**\n\n1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` is currently `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- This directly contradicts the submitted output (“fixed the tracking artifact” + “verified line 2 contains PROMISE_MET”).\n\n**Criteria assessment**\n1. Stage mission alignment: `yes` (the `change24hPercent` null-preservation in `app.js:83`-`app.js:86` supports reliable unavailable-data handling for totals).\n2. Story complet",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:33:40.702Z"
+    },
+    {
+      "task": "Portfolio totals",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` is still `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- This directly contradicts the reviewed output statement: “Changed `progress.txt:2` to `Running AI for: PROMISE_MET`.”\n\nCriteria assessment:\n\n1. Stage mission alignment: `partial yes` (the checked totals wiring is aligned with “live valuation” presentation), but this specific delivery is mostly verification/tracking, not new tot",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:34:35.090Z"
+    },
+    {
+      "task": "Portfolio totals",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Claimed tracking artifact update is not present in repo state.  \n- `progress.txt:2` is still `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the output claim and fails the stated tracking requirement for this story delivery.\n\nCriteria assessment:\n\n1. Stage mission alignment: `yes` (portfolio totals computation/rendering exists and is wired).  \n2. Story completion (“Portfolio totals”): `mostly yes` for code behav",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:35:27.041Z"
+    },
+    {
+      "task": "Portfolio totals",
+      "error": "**Findings (ordered by severity)**  \n1. `medium` Claimed tracking artifact update is not present in repo state.  \n- `progress.txt:2` is still `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the output claim (“Rewrote `progress.txt` and set line 2 to `PROMISE_MET`).\n\n**Criteria assessment**  \n1. Stage mission alignment: `yes` (portfolio totals wiring and 24h fallback behavior are implemented).  \n2. Story completion (“Portfolio totals”): `mostly yes` from co",
+      "stage": "Stage 2: Holdings Workflow",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:36:33.461Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "**Findings (ordered by severity)**  \n1. `medium` Tracking artifact claim is incorrect.  \n- `progress.txt:2` is `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the stated output and should be corrected for delivery integrity.\n\n**Criteria assessment**  \n1. Stage mission alignment: `yes`  \n- Chart.js integration and transition behavior are present (`index.html:129`, `index.html:141`, `app.js:905`, `app.js:966`, `styles.css:368`).\n\n2. Story completion (“Integr",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:38:21.694Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Claimed tracking artifact update is not present in repo state.  \n- `progress.txt:2` is currently `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the output claim and should be corrected for delivery integrity.\n\nCriteria assessment:\n1. Stage mission alignment: `yes` (Chart.js allocation chart and animated updates are wired in `index.html:130`, `index.html:141`, `app.js:905`, `app.js:916`, `app.js:966`, `app.js:10",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:39:21.640Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` is currently `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- The reviewed output explicitly claims line 2 was updated to `PROMISE_MET`, so this is a direct repo-state mismatch.\n\nCriteria assessment:\n1. Stage mission alignment: `yes` (Chart.js doughnut visualization and animated updates are wired: `index.html:141`, `index.html:130`, `app.js:915`, `app.js:933`, `app.js:986`).\n2. Story ",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:40:17.462Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "**Findings (ordered by severity)**\n\n1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` currently reads `Running AI for: N/A`, not `Running AI for: PROMISE_MET`.\n- This directly contradicts the submitted output (“Tracking artifact is now fixed”).\n\n**Criteria assessment**\n\n1. Stage mission alignment: `yes`  \n- Chart distribution UI + render path + animation are present (`index.html:130`, `app.js:915`, `app.js:933`).\n\n2. Story completion (“Integrate Chart.js”): `yes` for implement",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:41:41.210Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Claimed tracking artifact update is not present.\n- The output claims `progress.txt:2` is `Running AI for: PROMISE_MET`.\n- Actual repo state is still `Running AI for: N/A` at `progress.txt:2`.\n- This is a direct mismatch between reported completion and implementation state.\n\nCriteria assessment:\n\n1. Stage mission alignment: `yes`  \n- Chart.js is integrated and allocation visualization is rendered with animated transitions (`index.html:141`, `index.html",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T09:42:41.542Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings:\n1. `medium` Claimed tracking artifact update is incorrect.  \n- `progress.txt:2` currently is `Running AI for: STORY BEING REVIEWED: Integrate Chart.js`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the submitted output claim.\n\nCriteria assessment:\n1. Stage mission alignment: `yes` (portfolio distribution is rendered via doughnut chart, with transition animation in `app.js:933`).\n2. Story completion (“Integrate Chart.js”): `yes` (CDN included in `index.html:141`, can",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T10:16:20.286Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact claim is incorrect and does not match repo state.  \n- `progress.txt:2` currently reads `Running AI for: STORY BEING REVIEWED: Integrate Chart.js`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the submitted output claim that tracking is updated “exactly as required.”\n\nCriteria assessment:\n\n1. Stage mission alignment: `yes`  \n- Chart section/canvas and empty state are present in `index.html:130` and `index.html:131`",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T10:17:06.175Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Tracking artifact claim is incorrect.\n- `progress.txt:2` currently is `Running AI for: STORY BEING REVIEWED: Integrate Chart.js`.\n- The reviewed output claims it is exactly `Running AI for: PROMISE_MET`.\n- This is a direct repo-state mismatch and the stated blocker is not actually fixed.\n\nCriteria assessment:\n1. Stage mission alignment: `yes` (Chart.js distribution visualization with animation is present in `index.html:141`, `index.html:130`, `app.js:",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T10:17:47.826Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "**Findings (ordered by severity)**  \n1. `medium` Claimed tracking artifact fix is not present in repository state.  \n- `progress.txt:2` is currently `Running AI for: STORY BEING REVIEWED: Integrate Chart.js`, not `Running AI for: PROMISE_MET`.  \n- This directly contradicts the output claim (“Updated `progress.txt:2` to exactly `Running AI for: PROMISE_MET`” and “Rewrote `progress.txt` fully”).\n\n**Criteria assessment**  \n1. Stage mission alignment: `yes` (Chart.js allocation visualization with an",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T10:18:49.574Z"
+    },
+    {
+      "task": "Integrate Chart.js",
+      "error": "Findings (ordered by severity):\n\n1. `medium` Delivery claim about tracking artifact is incorrect.\n- Current repo state: `progress.txt:2` is `Running AI for: STORY BEING REVIEWED: Integrate Chart.js`.\n- Claimed output says `progress.txt:2` is `Running AI for: PROMISE_MET`.\n- This is a direct mismatch between reported completion and actual artifact.\n\nCriteria assessment:\n\n1. Stage Mission alignment: `yes`  \n- Chart section/canvas/empty state and Chart.js CDN are present (`index.html:130`, `index.h",
+      "stage": "Stage 3: Visualization",
+      "project": "Finance Dashboard",
+      "timestamp": "2026-02-06T10:19:31.197Z"
+    },
+    {
+      "task": "Enable strict TypeScript and lint/format pipeline",
+      "error": "1. **Node runtime compatibility mismatch** (`eslint.config.js:16`, `package.json:17`)  \n`eslint.config.js` uses `import.meta.dirname`, but `package.json` allows `node >=20.0.0`. `import.meta.dirname` is only available in later Node 20 minors, so lint can fail on allowed versions (early 20.x).  \nSuggested fix: either raise engines to a compatible minimum (for example `>=20.11.0`) or replace with a portable pattern (`fileURLToPath(new URL('.', import.meta.url))`).\n\nCriteria check:\n1. Stage Mission",
+      "stage": "Stage 1: Build Core",
+      "project": "TD1",
+      "timestamp": "2026-02-06T11:44:50.932Z"
+    },
+    {
+      "task": "Implement Basic DPS tower",
+      "error": "**Findings (by severity)**\n\n1. **Critical: enemy kill rewards can be granted multiple times for the same enemy**  \n   - `src/modules/simulation/world.ts:343` (`applyDamage`) gives gold whenever `enemy.health <= 0`, but does not guard against already-dead enemies.  \n   - `src/modules/simulation/world.ts:304` (`selectTowerTarget`) does not exclude enemies with `health <= 0`.  \n   - `src/modules/simulation/world.ts:457` removes defeated enemies only at end of step, so dead enemies remain targetable",
+      "stage": "Stage 2: Playable Loop",
+      "project": "TD1",
+      "timestamp": "2026-02-06T12:13:17.956Z"
+    },
+    {
+      "task": "Implement particle FX system",
+      "error": "[ERROR] AI tool failed (Code 2). error: unexpected argument '--no-tools' found\n\n  tip: to pass '--no-tools' as a value, use '-- --no-tools'\n\nUsage: codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --color <COLOR> --model <MODEL> --oss --local-provider <OSS_PROVIDER> [PROMPT]\n\nFor more information, try '--help'.",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:00:24.833Z"
+    },
+    {
+      "task": "Implement particle FX system",
+      "error": "[ERROR] AI tool failed (Code 1). Error: No default OSS provider configured. Use --local-provider=provider or set oss_provider to one of: lmstudio, ollama in config.toml",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:05:00.016Z"
+    },
+    {
+      "task": "Implement particle FX system",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { AudioEngine } from '../../audio/audioEngine';\n\n// --- PARTICLE POOL SYSTEM ---\n// A simple object pool to manage particle lifecycle and performance\nconst PARTICLE_POOL_SIZE = 200;\nconst particlePool: ",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:17:12.330Z"
+    },
+    {
+      "task": "Implement particle FX system",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { Vector2 } from 'three';\n\n// --- PARTICLE POOL SYSTEM ---\n// Pooled particles for performance and consistent memory management\ninterface ParticlePool {\n  active: Particle[];\n  inactive: Particle[];\n}\n\n",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:19:40.467Z"
+    },
+    {
+      "task": "Implement particle FX system",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { Vector2 } from 'three';\n\nexport class World {\n  private enemies: Enemy[] = [];\n  private towers: Tower[] = [];\n  private projectiles: Projectile[] = [];\n  private particles: Particle[] = [];\n  private",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:21:00.332Z"
+    },
+    {
+      "task": "Apply PBR-style materials",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { MapData } from '../../data/map';\nimport * as THREE from 'three';\n\nexport class World {\n  private scene: THREE.Scene;\n  private camera: THREE.PerspectiveCamera;\n  private renderer: THREE.WebGLRenderer;",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:25:21.192Z"
+    },
+    {
+      "task": "Implement hit-stop and screen shake",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { CameraShake } from '../../rendering/cameraShake';\nimport { HitStop } from '../../rendering/hitStop';\n\nexport class World {\n  private enemies: Enemy[] = [];\n  private towers: Tower[] = [];\n  private pr",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:28:53.837Z"
+    },
+    {
+      "task": "Implement hit-stop and screen shake",
+      "error": "### FILE: src/modules/simulation/world.ts\n```typescript\nimport { Enemy } from '../../data/enemies';\nimport { Tower } from '../../data/towers';\nimport { Projectile } from '../../data/projectiles';\nimport { Particle } from '../../data/particles';\nimport { GameState } from '../../simulation';\nimport { HitStop } from '../rendering/hitStop';\nimport { CameraShake } from '../rendering/cameraShake';\n\nexport class World {\n  private enemies: Enemy[] = [];\n  private towers: Tower[] = [];\n  private projecti",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:30:24.861Z"
+    },
+    {
+      "task": "Implement hit-stop and screen shake",
+      "error": "### FILE: src/modules/rendering/hitStop.ts\n```typescript\nexport class HitStop {\n  private timeScale: number = 1.0;\n  private accumulatedTime: number = 0;\n  private duration: number = 0;\n\n  public update(deltaTime: number): number {\n    if (this.duration > 0) {\n      this.duration -= deltaTime;\n      this.accumulatedTime += deltaTime;\n      return 0; // Stop time\n    }\n    return deltaTime;\n  }\n\n  public trigger(duration: number): void {\n    this.duration = duration;\n  }\n\n  public getTimeScale():",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:31:16.783Z"
+    },
+    {
+      "task": "Implement hit-stop and screen shake",
+      "error": "### FILE: src/modules/rendering/cameraShake.ts\n```typescript\nimport * as THREE from 'three';\n\nexport class CameraShake {\n  private camera: THREE.PerspectiveCamera;\n  private intensity: number = 0;\n  private decay: number = 0.9;\n  private positionOffset = new THREE.Vector3();\n  private rotationOffset = new THREE.Euler();\n\n  constructor(camera: THREE.PerspectiveCamera) {\n    this.camera = camera;\n  }\n\n  public addShake(intensity: number, duration: number = 0.5) {\n    this.intensity = intensity;\n  ",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:33:03.234Z"
+    },
+    {
+      "task": "Implement hit-stop and screen shake",
+      "error": "### FILE: src/modules/rendering/cameraShake.ts\n```typescript\nimport * as THREE from 'three';\n\nexport class CameraShake {\n  private camera: THREE.PerspectiveCamera;\n  private intensity: number = 0;\n  private decay: number = 0.9;\n  private positionOffset = new THREE.Vector3();\n  private rotationOffset = new THREE.Euler();\n\n  constructor(camera: THREE.PerspectiveCamera) {\n    this.camera = camera;\n  }\n\n  public addShake(intensity: number, duration: number = 0.5): void {\n    this.intensity = intensi",
+      "stage": "Stage 3: Visual & Feel Polish",
+      "project": "TD1",
+      "timestamp": "2026-02-06T13:34:55.111Z"
     }
   ],
   "settings": {
-    "maxIterations": 100,
-    "codexPath": "codex"
+    "baseSleepTime": 3000,
+    "telegramSettings": {
+      "enabled": true,
+      "botToken": "8143122981:AAHqUgqd3ZOp0DvNzYlkY6QNyix365i-im4",
+      "chatId": "1091352420",
+      "useHumanReview": false
+    }
   }
 }

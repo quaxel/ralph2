@@ -1,113 +1,121 @@
-import { spawn } from 'child_process';
 import 'dotenv/config';
 import fs from 'fs';
+import path from 'path';
 
 /**
- * Executes a prompt via codex-cli in non-interactive mode.
+ * Executes a prompt directly via OpenAI-compatible API (LM Studio or OpenAI).
+ * This replaces codex-cli and handles file writing manually.
+ * 
  * @param {string} prompt - The prompt to send to the AI.
- * @param {string} workingDir - The directory where the command should be executed.
- * @returns {Promise<string>} - The stdout from the AI tool.
+ * @param {string} workingDir - The directory where files should be written.
+ * @param {string} role - The role of the agent (DEVELOPER or REVIEWER).
+ * @returns {Promise<string>} - The AI's response text.
  */
-export async function runCodex(prompt, workingDir) {
-    const codexCmd = process.env.CODEX_COMMAND || 'codex';
+export async function runCodex(prompt, workingDir, role = 'DEVELOPER') {
+    const provider = process.env.CODEX_PROVIDER || 'openai';
+    const model = process.env.CODEX_MODEL || 'gpt-4o';
+    const apiKey = process.env.OPENAI_API_KEY || 'no-key-required';
 
-    // Safety check for CWD
-    const finalCwd = fs.existsSync(workingDir) ? workingDir : process.cwd();
+    let baseUrl = 'https://api.openai.com/v1/chat/completions';
+    if (provider === 'lmstudio') {
+        baseUrl = process.env.LMSTUDIO_API_BASE || 'http://localhost:1234/v1/chat/completions';
+    } else if (provider === 'ollama') {
+        baseUrl = process.env.OLLAMA_API_BASE || 'http://localhost:11434/v1/chat/completions';
+    }
 
-    return new Promise((resolve) => {
-        // Prepare args for non-interactive execution
-        const args = [
-            'exec',
-            '--dangerously-bypass-approvals-and-sandbox',
-            '--skip-git-repo-check',
-            '--color', 'never'
-        ];
+    // Role-specific instructions
+    let instruction = '';
+    if (role === 'REVIEWER') {
+        instruction = `
+INSTRUCTION FOR REVIEWER:
+1. Analyze the work done by the developer.
+2. If it meets all criteria, YOU MUST START YOUR RESPONSE WITH: REVIEW_PASSED
+3. If there are issues, provide specific feedback. 
+4. If you want to fix something yourself, use the format: ### FILE: path/to/file [newline] \`\`\` [content] \`\`\``.trim();
+    } else if (role === 'PRD' || role === 'JSON') {
+        instruction = `
+INSTRUCTION FOR ${role} GENERATION:
+1. Output ONLY the JSON object.
+2. Do not include any conversational text or markdown formatting outside the JSON.`.trim();
+    } else {
+        instruction = `
+CRITICAL INSTRUCTION FOR FILE EDITS:
+You must use the following format for ANY file you want to create or modify:
 
-        console.log(`[Codex] Starting: ${codexCmd} ${args.join(' ')}`);
-        console.log(`[Codex] Prompt length: ${prompt.length} chars (High Reasoning active)`);
+### FILE: filename_relative_to_project_root
+\`\`\`
+[FULL FILE CONTENT]
+\`\`\`
 
-        // We use spawn without shell: true to avoid security warnings and potential shell-related hangs
-        // We assume codexCmd is just the binary name/path. 
-        // If it's something like 'npx codex-cli', it might need special handling.
-        let cmd = codexCmd;
-        let finalArgs = [...args];
+1. Always provide the COMPLETE content of the file.
+2. Do not use placeholders like // ... existing code ...
+3. You MUST update 'progress.txt' with 'PROMISE_MET' when finished using the same format above.`.trim();
+    }
 
-        if (codexCmd.startsWith('npx ')) {
-            cmd = 'npx';
-            finalArgs = [codexCmd.split(' ')[1], ...args];
+    const enrichedPrompt = `${prompt}\n\n${instruction}`;
+
+    console.log(`[DirectAPI] Requesting ${provider}/${model} as ${role}...`);
+
+    try {
+        const response = await fetch(baseUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: model,
+                messages: [{ role: 'user', content: enrichedPrompt }],
+                temperature: 0.1
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API ${response.status}: ${errorText}`);
         }
 
-        const child = spawn(cmd, finalArgs, {
-            cwd: finalCwd,
-            env: { ...process.env, FORCE_COLOR: '0', CI: 'true' }
-        });
+        const data = await response.json();
+        const result = data.choices[0].message.content;
 
-        let stdout = '';
-        let stderr = '';
+        console.log(`[DirectAPI] Parsing response...`);
 
-        // Handle large stdin correctly
-        child.stdin.on('error', (err) => {
-            console.error('[Codex] Stdin Error:', err);
-        });
+        // regex to catch ### FILE: path followed by code block
+        const fileRegex = /### FILE: (.*?)\n+```.*?\n([\s\S]*?)```/g;
+        let match;
+        let filesUpdated = [];
 
-        child.stdin.write(prompt);
-        child.stdin.end();
+        while ((match = fileRegex.exec(result)) !== null) {
+            const filePath = match[1].trim();
+            const content = match[2];
+            const absolutePath = path.resolve(workingDir, filePath);
 
-        child.stdout.on('data', (data) => {
-            const chunk = data.toString();
-            stdout += chunk;
-            // Optionally log parts of stdout to see progress
-            if (chunk.includes('thinking')) console.log('[Codex] AI is thinking...');
-        });
-
-        child.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        child.on('error', (err) => {
-            console.error("[Codex] Spawn Error:", err);
-            resolve(`[ERROR] ${err.message}`);
-        });
-
-        child.on('close', (code) => {
-            console.log(`[Codex] Process finished with code ${code}`);
-
-            if (code !== 0) {
-                console.warn(`[Codex] Stderr: ${stderr}`);
+            // Safety Check: Prevent path traversal
+            if (!absolutePath.startsWith(path.resolve(workingDir))) {
+                console.warn(`[DirectAPI] Path Traversal attempted: ${filePath}`);
+                continue;
             }
 
-            // The actual content is usually at the end after the banner and thinking logs
-            // codex exec output often includes headers we might need to strip
-            let result = stdout.trim();
+            const dir = path.dirname(absolutePath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-            // If stdout is empty, fallback to stderr for error messages
-            if (!result && code !== 0) {
-                resolve(`[ERROR] AI tool failed (Code ${code}). ${stderr.trim()}`);
-            } else {
-                resolve(result);
-            }
-        });
-    });
+            fs.writeFileSync(absolutePath, content);
+            filesUpdated.push(filePath);
+        }
+
+        if (filesUpdated.length > 0) {
+            console.log(`[DirectAPI] ✅ Applied changes: ${filesUpdated.join(', ')}`);
+        } else {
+            console.log(`[DirectAPI] ℹ️ No file changes detected.`);
+        }
+
+        return result;
+    } catch (error) {
+        console.error(`[DirectAPI Error]`, error.message);
+        return `[ERROR] ${error.message}`;
+    }
 }
 
-/**
- * Checks if codex-cli is available.
- */
 export async function checkCodexAvailability() {
-    const codexCmd = process.env.CODEX_COMMAND || 'codex';
-    return new Promise((resolve) => {
-        let cmd = codexCmd;
-        let args = ['--version'];
-
-        if (codexCmd.startsWith('npx ')) {
-            cmd = 'npx';
-            args = [codexCmd.split(' ')[1], '--version'];
-        }
-
-        const child = spawn(cmd, args);
-        child.on('error', () => resolve({ available: false, command: codexCmd }));
-        child.on('close', (code) => {
-            resolve({ available: code === 0, command: codexCmd });
-        });
-    });
+    return { available: true, command: 'Direct API Runner' };
 }

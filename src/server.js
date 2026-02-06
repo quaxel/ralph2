@@ -79,9 +79,46 @@ class RalphServer {
                 orch.generatePRD(prompt)
                     .then((prd) => res.json({ status: 'prd_generated', prd }))
                     .catch((err) => res.status(500).json({ status: 'error', message: err.message }));
+            } else if (action === 'update-prd') {
+                const { prd } = req.body;
+                dbUtils.updateProjectPrd(id, prd).then(async () => {
+                    if (orch) await orch.syncPrd(prd); // Update local orch state and file
+                    res.json({ status: 'updated' });
+                });
+            } else if (action === 'update-settings') {
+                const { updates } = req.body;
+                dbUtils.saveProject({ id, ...updates }).then(() => {
+                    // Update orchestrator if running
+                    if (orch) {
+                        if (updates.useHumanReview !== undefined) orch.useHumanReview = updates.useHumanReview;
+                    }
+                    res.json({ status: 'updated' });
+                });
             } else {
                 res.status(400).send('Invalid action');
             }
+        });
+
+        // API: Lessons Management
+        this.app.get('/api/lessons', (req, res) => {
+            res.json(dbUtils.getLessons());
+        });
+
+        this.app.delete('/api/lessons/:timestamp', async (req, res) => {
+            const { timestamp } = req.params;
+            await dbUtils.deleteLesson(timestamp);
+            res.json({ status: 'deleted' });
+        });
+
+        this.app.get('/api/settings', (req, res) => {
+            res.json(dbUtils.getSettings());
+        });
+
+        this.app.post('/api/settings', async (req, res) => {
+            await dbUtils.updateSettings(req.body);
+            const { telegramManager } = await import('./utils/telegramUtils.js');
+            telegramManager.reInit();
+            res.json({ status: 'saved' });
         });
     }
 
@@ -102,10 +139,23 @@ class RalphServer {
         });
     }
 
+    async resumeRunningProjects() {
+        const projects = dbUtils.getProjects();
+        const runningProjects = projects.filter(p => p.status === 'running');
+
+        for (const project of runningProjects) {
+            console.log(`Resuming project: ${project.name}`);
+            let orch = new RalphOrchestrator(project, (data) => this.broadcast(data));
+            this.orchestrators.set(project.id, orch);
+            orch.start();
+        }
+    }
+
     start() {
         return new Promise((resolve) => {
-            this.server.listen(this.port, () => {
+            this.server.listen(this.port, async () => {
                 console.log(`Ralph Dashboard: http://localhost:${this.port}`);
+                await this.resumeRunningProjects();
                 resolve();
             });
         });

@@ -57,3 +57,60 @@ export async function getLatestCommitMessage(projectPath) {
         return null;
     }
 }
+/**
+ * Reverts the project to the last stable commit.
+ * @param {string} projectPath - The absolute path to the project directory.
+ */
+/**
+ * Checks if there are any uncommitted changes in the repository.
+ * @param {string} projectPath 
+ * @returns {Promise<boolean>}
+ */
+export async function hasUncommittedChanges(projectPath) {
+    const git = simpleGit(projectPath);
+    try {
+        const status = await git.status();
+        const filteredFiles = status.files.filter(f =>
+            !['agents.md', 'progress.txt'].includes(f.path) &&
+            !f.path.startsWith('.ralph/')
+        );
+        return filteredFiles.length > 0;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Commits manual changes with a specific prefix.
+ * @param {string} projectPath 
+ * @returns {Promise<string[]>} List of changed files
+ */
+export async function commitManualChanges(projectPath) {
+    const git = simpleGit(projectPath);
+    try {
+        const status = await git.status();
+        const files = status.files
+            .map(f => f.path)
+            .filter(f => !['agents.md', 'progress.txt'].includes(f) && !f.startsWith('.ralph/'));
+
+        if (files.length === 0) return [];
+
+        await git.add(files);
+        await git.commit(`[USER_MANUAL_CHANGE] Detected changes in: ${files.join(', ')}`);
+        return files;
+    } catch (error) {
+        console.error("Failed to commit manual changes:", error);
+        return [];
+    }
+}
+
+export async function rollbackToLastCommit(projectPath) {
+    const git = simpleGit(projectPath);
+    try {
+        console.warn(`[Git] Rolling back ${projectPath} to last stable commit and cleaning untracked files...`);
+        await git.reset(['--hard', 'HEAD']);
+        await git.clean('f', ['-d']); // clean untracked files and directories
+    } catch (error) {
+        console.error(`Git rollback failed at ${projectPath}:`, error);
+    }
+}

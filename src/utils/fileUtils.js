@@ -60,3 +60,25 @@ export async function deleteDirectory(path) {
         throw error;
     }
 }
+/**
+ * List all files in a directory recursively.
+ * @param {string} dir - The directory to list.
+ * @returns {Promise<string[]>} - A list of absolute file paths.
+ */
+export async function listFilesRecursive(dir) {
+    let results = [];
+    const list = await fs.readdir(dir);
+
+    for (const file of list) {
+        const filePath = `${dir}/${file}`;
+        const stat = await fs.stat(filePath);
+
+        if (stat && stat.isDirectory()) {
+            const recursiveResults = await listFilesRecursive(filePath);
+            results = results.concat(recursiveResults);
+        } else {
+            results.push(filePath);
+        }
+    }
+    return results;
+}

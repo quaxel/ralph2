@@ -14,6 +14,10 @@ async function main() {
         await dbUtils.initDb();
         console.log("Database initialized.");
 
+        // NEW: Initialize Telegram Bot
+        const { telegramManager } = await import('./src/utils/telegramUtils.js');
+        telegramManager.init();
+
         // 2. Health Check: Codex Availability
         const codexStatus = await codexUtils.checkCodexAvailability();
         if (codexStatus.available) {
