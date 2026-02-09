@@ -39,7 +39,7 @@ class RalphServer {
             const { name, path: manualPath, prd } = req.body;
 
             // Auto-generate project path if not provided manually
-            const projectPath = manualPath || path.join(process.cwd(), 'projects', name);
+            const projectPath = manualPath || path.join(process.cwd(), 'Projects', name);
 
             const project = {
                 id: name,
@@ -149,6 +149,35 @@ class RalphServer {
             this.orchestrators.set(project.id, orch);
             orch.start();
         }
+    }
+
+    /**
+     * Creates and starts a new project from a name and prompt.
+     * Primarily used by Telegram integration.
+     */
+    async createNewProject(name, prompt) {
+        console.log(`[Server] Creating new project via Telegram: ${name}`);
+        const projectPath = path.join(process.cwd(), 'Projects', name);
+
+        const project = {
+            id: name,
+            name,
+            path: projectPath,
+            prd: { stages: [] },
+            status: 'created'
+        };
+
+        await dbUtils.saveProject(project);
+
+        let orch = new RalphOrchestrator(project, (data) => this.broadcast(data));
+        this.orchestrators.set(name, orch);
+
+        // Chain the startup process
+        await orch.initProject(); // Create directory first
+        await orch.generatePRD(prompt); // Then design the plan
+        orch.start();
+
+        return project;
     }
 
     start() {

@@ -28,6 +28,7 @@ async function main() {
 
         // 3. Start Controller Server
         const server = new RalphServer(3000);
+        telegramManager.setServer(server);
         await server.start();
 
         console.log("Control center is ready.");

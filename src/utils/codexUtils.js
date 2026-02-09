@@ -56,7 +56,11 @@ You must use the following format for ANY file you want to create or modify:
 
     console.log(`[DirectAPI] Requesting ${provider}/${model} as ${role}...`);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+
     try {
+        console.log(`[DirectAPI] Awaiting response from ${provider}...`);
         const response = await fetch(baseUrl, {
             method: 'POST',
             headers: {
@@ -67,8 +71,10 @@ You must use the following format for ANY file you want to create or modify:
                 model: model,
                 messages: [{ role: 'user', content: enrichedPrompt }],
                 temperature: 0.1
-            })
+            }),
+            signal: controller.signal
         });
+        clearTimeout(timeout);
 
         if (!response.ok) {
             const errorText = await response.text();

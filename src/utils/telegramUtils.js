@@ -7,6 +7,12 @@ class TelegramManager {
         this.settings = null;
         this.approvalPromise = null;
         this.approvalResolve = null;
+        this.server = null; // Reference to RalphServer
+        this.userState = new Map(); // chatId -> { step, projectName, projectPrompt }
+    }
+
+    setServer(server) {
+        this.server = server;
     }
 
     init() {
@@ -25,17 +31,16 @@ class TelegramManager {
                 this.bot.command('help', (ctx) => {
                     if (ctx.from.id.toString() !== this.settings.chatId) return;
                     const helpMsg = `
-🤖 *Ralph AR - Enhanced Command List*
+🤖 *Ralph AR - Command List*
 
+/new - Create a new project.
 /status - Overall system health.
-/current - Detailed view of the *currently running* project.
-/projects - Summary list of all projects.
+/current - View currently running project.
+/projects - List all projects.
 /help - Show this help menu.
 
 *Mobile Review:*
-On task completion (if enabled), I'll send you *Approve/Reject* buttons.
-
-*Note:* Secure master link active. Only responds to configured Chat ID.
+On task completion, I'll send you *Approve/Reject* buttons.
 `.trim();
                     ctx.reply(helpMsg, { parse_mode: 'Markdown' });
                 });
@@ -43,6 +48,20 @@ On task completion (if enabled), I'll send you *Approve/Reject* buttons.
                 this.bot.command('status', (ctx) => {
                     if (ctx.from.id.toString() !== this.settings.chatId) return;
                     ctx.reply("🟢 *Ralph AR Systems: ONLINE*\nMemory: Stable\nOrchestrator: Active\nCodex Connection: Verified", { parse_mode: 'Markdown' });
+                });
+
+                this.bot.command('new', (ctx) => {
+                    if (ctx.from.id.toString() !== this.settings.chatId) return;
+
+                    const args = ctx.message.text.split(' ').slice(1);
+                    if (args.length > 0) {
+                        const projectName = args.join('_');
+                        this.userState.set(ctx.from.id, { step: 'AWAITING_PROMPT', projectName });
+                        ctx.reply(`🏗 *Project:* \`${projectName}\`\n\nWhat would you like to build? Please enter the project prompt:`, { parse_mode: 'Markdown' });
+                    } else {
+                        this.userState.set(ctx.from.id, { step: 'AWAITING_NAME' });
+                        ctx.reply("📝 What should be the **name** of the new project?", { parse_mode: 'Markdown' });
+                    }
                 });
 
                 this.bot.command('current', (ctx) => {
@@ -82,6 +101,44 @@ On task completion (if enabled), I'll send you *Approve/Reject* buttons.
                         return `${statusIcon} *${p.name}* - ${p.status}`;
                     }).join('\n');
                     ctx.reply(`📂 *Project Directory:*\n\n${list}`, { parse_mode: 'Markdown' });
+                });
+
+                // Generic text handler for state machine
+                this.bot.on('text', async (ctx) => {
+                    if (ctx.from.id.toString() !== this.settings.chatId) return;
+                    if (ctx.message.text.startsWith('/')) return;
+
+                    const state = this.userState.get(ctx.from.id);
+                    if (!state) return;
+
+                    if (state.step === 'AWAITING_NAME') {
+                        const projectName = ctx.message.text.trim().replace(/\s+/g, '_');
+                        state.projectName = projectName;
+                        state.step = 'AWAITING_PROMPT';
+                        ctx.reply(`🏗 *Project:* \`${projectName}\`\n\nWhat would you like to build? Please enter the project prompt:`, { parse_mode: 'Markdown' });
+                    }
+                    else if (state.step === 'AWAITING_PROMPT') {
+                        const prompt = ctx.message.text.trim();
+                        const projectName = state.projectName;
+
+                        this.userState.delete(ctx.from.id); // Clear state
+
+                        ctx.reply(`🚀 *Starting Creation...*\nProject: \`${projectName}\`\n_Analyzing prompt and generating plan..._`, { parse_mode: 'Markdown' });
+
+                        // Run in background to avoid Telegram handler timeout
+                        (async () => {
+                            try {
+                                if (!this.server) {
+                                    throw new Error("Ralph Server not linked to Telegram Manager.");
+                                }
+                                await this.server.createNewProject(projectName, prompt);
+                                ctx.reply(`✅ *Project Initialized!*\nDevelopment for \`${projectName}\` has started. I will notify you of progress.`, { parse_mode: 'Markdown' });
+                            } catch (error) {
+                                console.error("[Telegram] Project Creation Error:", error);
+                                ctx.reply(`❌ *Error creating project \`${projectName}\`:* ${error.message}`, { parse_mode: 'Markdown' });
+                            }
+                        })();
+                    }
                 });
 
                 this.bot.action('approve_task', (ctx) => {

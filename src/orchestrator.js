@@ -552,6 +552,7 @@ STRICT: Output ONLY JSON.
 
             this.prd = generatedPrd;
             await dbUtils.saveProject({ id: this.id, prd: this.prd });
+            await this.syncPrd(this.prd); // SYNC TO DISK!
             this.updateDashboard({ status: 'prd_ready', message: 'Stage journey generated.', prd: this.prd });
 
             return generatedPrd;
