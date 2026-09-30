@@ -1592,6 +1592,11 @@
             return c && board.contains(c) ? c : null;
         }
 
+        // A finger resting on the thin gap between cells still counts as the nearest cell
+        function cellNear(x, y) {
+            return cellAt(x, y) || cellAt(x - 4, y) || cellAt(x + 4, y) || cellAt(x, y - 4) || cellAt(x, y + 4);
+        }
+
         const MULTI_TYPES = { 2: ['s', 17], 3: ['t', 11], 4: ['c', 8] };
 
         function multiKey(nums) {
@@ -1657,7 +1662,7 @@
         const SWIPE_EDGE = 0.36;
 
         function swipeAt(x, y) {
-            const cell = cellAt(x, y);
+            const cell = cellNear(x, y);
             if (!cell) return;
             const key = resolveTarget(cell, x, y, swipeDir, SWIPE_EDGE);
             if (swipeVisited.has(key)) return;
@@ -1680,11 +1685,12 @@
 
         board.addEventListener('pointerdown', e => {
             if (e.button !== 0 || spinning) return;
-            const cell = cellAt(e.clientX, e.clientY);
+            swipeVisited = new Set();
+            swipePrev = { x: e.clientX, y: e.clientY };
+            const cell = cellNear(e.clientX, e.clientY);
             if (!cell) return;
             const key = resolveTarget(cell, e.clientX, e.clientY);
-            swipeVisited = new Set([key]);
-            swipePrev = { x: e.clientX, y: e.clientY };
+            swipeVisited.add(key);
             placeBet(key);
         });
         board.addEventListener('pointermove', e => {
