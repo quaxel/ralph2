@@ -151,6 +151,15 @@
             border-radius: 6px;
         }
 
+        .board.vertical {
+            grid-template-columns: 44px repeat(3, 1fr) 56px;
+            grid-template-rows: repeat(14, 40px);
+            min-width: 0;
+        }
+
+        .cell.vert { writing-mode: vertical-rl; transform: rotate(180deg); }
+        .cell.vert > .chip-stack { transform: rotate(180deg); writing-mode: horizontal-tb; }
+
         .cell {
             position: relative;
             display: grid;
@@ -394,31 +403,61 @@
             cellEls[key] = el;
         }
 
-        function buildBoard() {
-            addCell('n0', 'zero', 1, 1, 3, 1);
-            for (let c = 0; c < 12; c++) {
-                for (let r = 0; r < 3; r++) {
-                    const n = c * 3 + (3 - r);
-                    addCell('n' + n, colorOf(n), r + 1, c + 2);
-                }
-            }
-            addCell('col3', 'small', 1, 14);
-            addCell('col2', 'small', 2, 14);
-            addCell('col1', 'small', 3, 14);
-            addCell('doz1', 'small', 4, 2, 1, 4);
-            addCell('doz2', 'small', 4, 6, 1, 4);
-            addCell('doz3', 'small', 4, 10, 1, 4);
-            addCell('low', 'small', 5, 2, 1, 2);
-            addCell('even', 'small', 5, 4, 1, 2);
-            addCell('red', 'red', 5, 6, 1, 2);
-            addCell('black', 'black', 5, 8, 1, 2);
-            addCell('odd', 'small', 5, 10, 1, 2);
-            addCell('high', 'small', 5, 12, 1, 2);
-            [[4, 1], [5, 1], [4, 14], [5, 14]].forEach(([r, c]) => {
+        function addFillers(cells) {
+            cells.forEach(([r, c]) => {
                 const f = document.createElement('div');
                 f.style.cssText = `grid-row:${r};grid-column:${c};background:var(--felt-dark)`;
                 board.appendChild(f);
             });
+        }
+
+        function buildBoard() {
+            const vertical = window.matchMedia('(max-width: 800px)').matches;
+            board.innerHTML = '';
+            for (const k of Object.keys(cellEls)) delete cellEls[k];
+            board.classList.toggle('vertical', vertical);
+
+            if (vertical) {
+                addCell('n0', 'zero', 1, 2, 1, 3);
+                for (let n = 1; n <= 36; n++) {
+                    addCell('n' + n, colorOf(n), 2 + Math.floor((n - 1) / 3), 2 + (n - 1) % 3);
+                }
+                addCell('col1', 'small', 14, 2);
+                addCell('col2', 'small', 14, 3);
+                addCell('col3', 'small', 14, 4);
+                addCell('doz1', 'small vert', 2, 1, 4);
+                addCell('doz2', 'small vert', 6, 1, 4);
+                addCell('doz3', 'small vert', 10, 1, 4);
+                addCell('low', 'small', 2, 5, 2);
+                addCell('even', 'small', 4, 5, 2);
+                addCell('red', 'red', 6, 5, 2);
+                addCell('black', 'black', 8, 5, 2);
+                addCell('odd', 'small', 10, 5, 2);
+                addCell('high', 'small', 12, 5, 2);
+                addFillers([[1, 1], [1, 5], [14, 1], [14, 5]]);
+            } else {
+                addCell('n0', 'zero', 1, 1, 3, 1);
+                for (let c = 0; c < 12; c++) {
+                    for (let r = 0; r < 3; r++) {
+                        const n = c * 3 + (3 - r);
+                        addCell('n' + n, colorOf(n), r + 1, c + 2);
+                    }
+                }
+                addCell('col3', 'small', 1, 14);
+                addCell('col2', 'small', 2, 14);
+                addCell('col1', 'small', 3, 14);
+                addCell('doz1', 'small', 4, 2, 1, 4);
+                addCell('doz2', 'small', 4, 6, 1, 4);
+                addCell('doz3', 'small', 4, 10, 1, 4);
+                addCell('low', 'small', 5, 2, 1, 2);
+                addCell('even', 'small', 5, 4, 1, 2);
+                addCell('red', 'red', 5, 6, 1, 2);
+                addCell('black', 'black', 5, 8, 1, 2);
+                addCell('odd', 'small', 5, 10, 1, 2);
+                addCell('high', 'small', 5, 12, 1, 2);
+                addFillers([[4, 1], [5, 1], [4, 14], [5, 14]]);
+            }
+            renderBets();
         }
 
         function chipColorFor(amount) {
@@ -777,6 +816,7 @@
         }
 
         // ---------- Init ----------
+        window.matchMedia('(max-width: 800px)').addEventListener('change', buildBoard);
         loadState();
         buildBoard();
         buildChips();
