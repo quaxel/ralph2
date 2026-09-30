@@ -53,6 +53,7 @@
         .stats {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .stat {
@@ -143,7 +144,7 @@
         .board {
             display: grid;
             grid-template-columns: repeat(14, minmax(38px, 1fr));
-            grid-template-rows: repeat(3, 48px) 40px 40px;
+            grid-template-rows: auto auto auto 40px 40px;
             gap: 3px;
             min-width: 560px;
             background: var(--gold);
@@ -155,10 +156,16 @@
         .chip-stack.multi { z-index: 2; }
 
         .board.vertical {
-            grid-template-columns: 44px repeat(3, 1fr) 56px;
-            grid-template-rows: repeat(14, 40px);
+            --square: 52px;
+            grid-template-columns: 44px repeat(3, var(--square)) 56px;
+            grid-template-rows: 40px repeat(12, var(--square)) 40px;
+            width: max-content;
+            max-width: 100%;
+            margin-inline: auto;
             min-width: 0;
         }
+
+        .board:not(.vertical) .cell[data-key^="n"]:not(.zero) { aspect-ratio: 1; }
 
         .cell.vert { writing-mode: vertical-rl; transform: rotate(180deg); }
         .cell.vert > .chip-stack { transform: rotate(180deg); writing-mode: horizontal-tb; }
