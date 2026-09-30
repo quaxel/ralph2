@@ -458,6 +458,8 @@
             color: var(--text);
         }
 
+        #add-note { font-size: 0.9rem; color: #ffe27a; }
+
         #add-error { min-height: 1.2em; font-size: 0.85rem; color: #ff8a8a; }
 
         @media (prefers-reduced-motion: reduce) {
@@ -613,6 +615,7 @@
     <div id="add-panel" hidden>
         <div class="card" role="dialog" aria-labelledby="add-title">
             <h2 id="add-title">Bakiye Ekle</h2>
+            <div id="add-note" hidden>Bakiyeniz bitti. Devam etmek için bakiye ekleyin.</div>
             <div class="presets" id="presets"></div>
             <div class="custom">
                 <input id="add-input" type="number" inputmode="numeric" min="1" max="1000000" step="1" placeholder="Başka tutar">
@@ -1643,6 +1646,7 @@
                 setTimeout(() => sfx.lose(), 350);
                 vibrate(120);
             }
+            setTimeout(checkBroke, winnings > 0 ? 4500 : 1500);
         }
 
         // Idle wheel rotation; a resting ball rides along with its pocket
@@ -1771,6 +1775,7 @@
         update();
         drawWheel();
         requestAnimationFrame(idle);
+        setTimeout(checkBroke, 400);
 
         const MAX_ADD = 1000000;
         const closeAdd = () => { $('add-panel').hidden = true; };
@@ -1799,11 +1804,19 @@
             b.addEventListener('click', () => addBalance(v));
             $('presets').appendChild(b);
         });
-        $('add-btn').addEventListener('click', () => {
+        function openAdd(auto = false) {
             $('add-error').textContent = '';
             $('add-input').value = '';
+            $('add-note').hidden = !auto;
             $('add-panel').hidden = false;
-        });
+        }
+
+        // Offer to top up when the player cannot place even the smallest chip
+        function checkBroke() {
+            if (!spinning && totalBet() === 0 && balance < CHIPS[0].value && $('add-panel').hidden) openAdd(true);
+        }
+
+        $('add-btn').addEventListener('click', () => openAdd());
         $('add-custom').addEventListener('click', () => addBalance(Number($('add-input').value)));
         $('add-input').addEventListener('keydown', e => { if (e.key === 'Enter') addBalance(Number($('add-input').value)); });
         $('add-close').addEventListener('click', closeAdd);
