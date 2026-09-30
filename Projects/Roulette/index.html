@@ -620,6 +620,7 @@
         }
 
         #feature-hud {
+            flex-wrap: wrap;
             display: flex;
             justify-content: space-between;
             gap: 8px;
@@ -734,6 +735,159 @@
         .pay-table td:first-child, .pay-table th:first-child { text-align: left; }
         .pay-table th { color: var(--gold); font-size: 0.7rem; letter-spacing: 1px; }
         .pay-table .ico { display: inline-block; width: 1.6em; text-align: center; }
+
+        @property --spin {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes spinAngle { to { --spin: 360deg; } }
+        @keyframes spinY { to { transform: rotateY(360deg); } }
+        @keyframes cloverIdle { 50% { transform: scale(1.08) rotate(6deg); } }
+        @keyframes dropAway { to { transform: translateY(150%) rotate(28deg); opacity: 0; } }
+        @keyframes lockIn { 40% { scale: 1.3; } 100% { scale: 1; } }
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg) scale(0.5); opacity: 0; }
+            60% { transform: rotateY(-20deg) scale(1.2); opacity: 1; }
+            100% { transform: rotateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes miniRoll { to { transform: translateY(-50%); } }
+        @keyframes shock {
+            0% { scale: 0.2; opacity: 0.9; }
+            100% { scale: 2.4; opacity: 0; }
+        }
+        @keyframes floatNum {
+            0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+            20% { transform: translate(-50%, -14px) scale(1.15); opacity: 1; }
+            100% { transform: translate(-50%, -70px) scale(1); opacity: 0; }
+        }
+        @keyframes respinReset {
+            30% { transform: scale(1.35); background: var(--gold); color: #1a1a1a; }
+        }
+        @keyframes respinLow {
+            50% { box-shadow: 0 0 14px #ff5a5a; border-color: #ff5a5a; }
+        }
+        @keyframes jpHit {
+            0%, 100% { scale: 1; }
+            30% { scale: 1.18; background: rgba(226, 182, 70, 0.6); }
+        }
+
+        .machine::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 21px;
+            padding: 5px;
+            background: conic-gradient(from var(--spin), #ffe27a, rgba(255, 226, 122, 0) 22%, #ffe27a 50%, rgba(255, 226, 122, 0) 72%, #ffe27a);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            animation: spinAngle 6s linear infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .machine.feature-on::before { animation-duration: 1.6s; opacity: 1; }
+        .machine.feature-on { box-shadow: 0 0 40px rgba(46, 204, 113, 0.55), inset 0 0 20px rgba(0, 0, 0, 0.5); }
+
+        .sym .clover-sym { width: 80%; height: 80%; }
+        .sym.base-clover svg { animation: cloverIdle 1.6s ease-in-out infinite; }
+        .sym.drop-away { animation: dropAway 0.6s ease-in forwards; animation-delay: var(--d, 0ms); }
+        .sym.lock-in { animation: lockIn 0.6s ease-out; animation-delay: var(--d, 0ms); background: rgba(46, 204, 113, 0.25); }
+
+        .sym.clover-cell.locked {
+            box-shadow: inset 0 0 0 2px rgba(226, 182, 70, 0.55);
+            background: radial-gradient(circle, rgba(46, 204, 113, 0.22), rgba(0, 0, 0, 0) 70%);
+        }
+
+        .sym.flip { animation: flipIn 0.6s ease-out; }
+        .sym .shock {
+            position: absolute;
+            inset: 15%;
+            border-radius: 50%;
+            border: 3px solid #ffe27a;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .sym.pop .shock, .sym.flip .shock { animation: shock 0.6s ease-out; }
+
+        .sym.gold-clover { background: radial-gradient(circle, rgba(255, 226, 122, 0.35), rgba(0, 0, 0, 0) 70%); }
+        .sym.red-clover { background: radial-gradient(circle, rgba(255, 90, 90, 0.4), rgba(0, 0, 0, 0) 70%); animation-name: flipIn; }
+        .sym.red-clover.locked { box-shadow: inset 0 0 0 2px #ff5a5a, 0 0 12px rgba(255, 90, 90, 0.8); }
+        .sym.jp-mini .val { color: #f0b48a; }
+        .sym.jp-minor .val { color: #e3e8ee; }
+        .sym.jp-major .val { color: #ffe27a; }
+        .sym.jp-mini { box-shadow: inset 0 0 0 2px #cd7f32; }
+        .sym.jp-minor { box-shadow: inset 0 0 0 2px #c0c8d2; }
+        .sym.jp-major { box-shadow: inset 0 0 0 2px #ffd54a, 0 0 10px rgba(255, 213, 74, 0.8); }
+
+        .sym.rolling { overflow: hidden; }
+        .mini-reel { position: absolute; left: 0; top: 0; width: 100%; animation: miniRoll 0.3s linear infinite; }
+        .mini-reel i { display: grid; place-items: center; width: 100%; aspect-ratio: 1; }
+        .mini-reel i.c svg { width: 55%; height: 55%; opacity: 0.55; filter: blur(1.2px); }
+
+        .float-num {
+            position: absolute;
+            z-index: 8;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 3px #000, 0 2px 6px #000;
+            pointer-events: none;
+            animation: floatNum 1s ease-out forwards;
+        }
+
+        .float-num.big { color: #ffe27a; font-size: 1.4rem; text-shadow: 0 0 4px #000, 0 0 14px rgba(226, 182, 70, 0.95); }
+
+        #slot-banner .emblem { display: inline-block; perspective: 300px; }
+        #slot-banner .emblem svg { width: 1.1em; height: 1.1em; vertical-align: -0.15em; margin-inline: 0.15em; animation: spinY 1.4s linear infinite; }
+
+        #clover-count {
+            position: absolute;
+            left: 50%;
+            top: -14px;
+            transform: translateX(-50%);
+            z-index: 5;
+            padding: 3px 14px;
+            border-radius: 20px;
+            background: #0b3d27;
+            border: 2px solid var(--gold);
+            color: #ffe27a;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            animation: badgeIn 0.3s ease-out;
+        }
+
+        #feature-hud { align-items: center; }
+        #feature-hud span.reset { animation: respinReset 0.5s ease-out; }
+        #feature-hud span.low { animation: respinLow 0.7s ease-in-out infinite; }
+
+        .grand-slots { display: flex; gap: 4px; }
+
+        .gslot {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 90, 90, 0.7);
+            background: rgba(0, 0, 0, 0.4);
+            display: grid;
+            place-items: center;
+            opacity: 0.45;
+            transition: opacity 0.3s, box-shadow 0.3s;
+        }
+
+        .gslot svg { width: 80%; height: 80%; }
+        .gslot.lit { opacity: 1; border-style: solid; box-shadow: 0 0 14px rgba(255, 90, 90, 0.95); }
+
+        .jp.hit { animation: jpHit 0.8s ease-out; }
+        .jp { transition: box-shadow 0.3s; }
+        .slot:has(.machine.feature-on) .jp { box-shadow: 0 0 8px rgba(226, 182, 70, 0.6); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .machine::before, .sym.base-clover svg, #slot-banner .emblem svg, .mini-reel { animation: none; }
+        }
 
         #fx {
             position: fixed;
@@ -983,7 +1137,8 @@
         <div class="machine">
             <div class="reels" id="reels"></div>
             <div id="slot-banner" hidden></div>
-            <div id="feature-hud" hidden><span id="hud-respins"></span><span id="hud-total"></span></div>
+            <div id="feature-hud" hidden><span id="hud-respins"></span><div class="grand-slots" id="hud-grand"></div><span id="hud-total"></span></div>
+            <div id="clover-count" hidden></div>
         </div>
 
         <div id="slot-msg">Çevirmek için ÇEVİR'e basın veya makaraları kaydırın</div>
@@ -2175,7 +2330,7 @@
             $('wheel').addEventListener(type, () => { wheelSwipe = null; }));
 
         // ---------- Slot: Clover Link ----------
-        // Math (RTP about 94%, simulated over 6 million spins)
+        // Math (RTP about 93%, simulated over 8 million spins)
         const SLOT = {
             SYMBOLS: ['cherry', 'lemon', 'orange', 'apple', 'grape', 'melon', 'bell', 'seven', 'star', 'clover'],
             WEIGHTS: [24, 22, 16, 12, 8, 6, 4, 2, 4, 9],
@@ -2193,16 +2348,17 @@
             ],
             TRIGGER: 5,
             RESPINS: 3,
-            LAND_CHANCE: 0.06,
+            LAND_CHANCE: 0.075,
             JACKPOTS: { mini: 20, minor: 100, major: 400, grand: 1000 },
-            P_RED: 0.005,
-            P_GOLD: 0.015,
+            RED_REELS: [0, 2, 4],
+            P_RED: 0.05,
+            P_GOLD: 0.03,
             P_JACKPOT: { major: 0.004, minor: 0.012, mini: 0.035 },
             CREDITS: [0.5, 1, 2, 3, 5, 10],
-            CREDIT_WEIGHTS: [30, 30, 20, 10, 7, 3],
-            GOLD_MULTS: [2, 3, 5],
-            GOLD_WEIGHTS: [60, 30, 10],
-            GOLD_CAP: 10
+            CREDIT_WEIGHTS: [20, 28, 22, 15, 11, 4],
+            GOLD_CASH: [5, 10, 20, 50],
+            GOLD_WEIGHTS: [50, 30, 15, 5],
+            FULL_SCREEN_MULT: 2
         };
         const SLOT_CLOVER = SLOT.SYMBOLS.indexOf('clover');
         const SLOT_STAR = SLOT.SYMBOLS.indexOf('star');
@@ -2247,11 +2403,11 @@
             return { wins, lineTotal, stars, starWin, clovers, total: lineTotal + starWin };
         }
 
-        function slotRollClover(rnd) {
+        function slotRollClover(rnd, allowRed) {
             let r = rnd();
-            if (r < SLOT.P_RED) return { kind: 'red' };
-            r -= SLOT.P_RED;
-            if (r < SLOT.P_GOLD) return { kind: 'gold', mult: SLOT.GOLD_MULTS[slotPick(SLOT.GOLD_WEIGHTS, rnd)] };
+            if (allowRed && r < SLOT.P_RED) return { kind: 'red' };
+            r = rnd();
+            if (r < SLOT.P_GOLD) return { kind: 'gold', mult: SLOT.GOLD_CASH[slotPick(SLOT.GOLD_WEIGHTS, rnd)] };
             r -= SLOT.P_GOLD;
             for (const kind of ['major', 'minor', 'mini']) {
                 if (r < SLOT.P_JACKPOT[kind]) return { kind };
@@ -2260,21 +2416,30 @@
             return { kind: 'credit', mult: SLOT.CREDITS[slotPick(SLOT.CREDIT_WEIGHTS, rnd)] };
         }
 
+        // The grand clover may land once on each of reels 1, 3 and 5
+        function slotCanRed(cells, r) {
+            return SLOT.RED_REELS.includes(r) && !cells[r].some(c => c && c.kind === 'red');
+        }
+
         function slotCloverValue(clover, bet) {
-            if (clover.kind === 'credit') return clover.mult * bet;
+            if (clover.kind === 'credit' || clover.kind === 'gold') return clover.mult * bet;
             if (SLOT.JACKPOTS[clover.kind] && clover.kind !== 'grand') return SLOT.JACKPOTS[clover.kind] * bet;
             return 0;
         }
 
         function slotFeatureStart(grid, rnd) {
-            return grid.map(col => col.map(s => (s === SLOT_CLOVER ? slotRollClover(rnd) : null)));
+            const cells = grid.map(col => col.map(() => null));
+            grid.forEach((col, r) => col.forEach((s, row) => {
+                if (s === SLOT_CLOVER) cells[r][row] = slotRollClover(rnd, slotCanRed(cells, r));
+            }));
+            return cells;
         }
 
         function slotRespin(cells, rnd) {
             const landed = [];
             cells.forEach((col, r) => col.forEach((cell, row) => {
                 if (!cell && rnd() < SLOT.LAND_CHANCE) {
-                    const clover = slotRollClover(rnd);
+                    const clover = slotRollClover(rnd, slotCanRed(cells, r));
                     cells[r][row] = clover;
                     landed.push({ r, row, clover });
                 }
@@ -2283,20 +2448,25 @@
         }
 
         function slotFeatureTotal(cells, bet) {
-            let sum = 0;
-            let golden = 1;
-            let reds = 0;
             let filled = 0;
+            let reds = 0;
             for (const col of cells) for (const c of col) {
                 if (!c) continue;
                 filled++;
-                sum += slotCloverValue(c, bet);
-                if (c.kind === 'gold') golden *= c.mult;
                 if (c.kind === 'red') reds++;
             }
-            golden = Math.min(golden, SLOT.GOLD_CAP);
-            const grand = reds >= 3 || filled === 15 ? SLOT.JACKPOTS.grand * bet : 0;
-            return { sum, golden, grand, filled, total: sum * golden + grand };
+            // A full screen doubles every prize except the jackpots
+            const fullScreen = filled === 15;
+            let sum = 0;
+            let jackpots = 0;
+            for (const col of cells) for (const c of col) {
+                if (!c) continue;
+                const value = slotCloverValue(c, bet);
+                if (c.kind === 'credit' || c.kind === 'gold') sum += fullScreen ? value * SLOT.FULL_SCREEN_MULT : value;
+                else jackpots += value;
+            }
+            const grand = reds >= 3 ? SLOT.JACKPOTS.grand * bet : 0;
+            return { sum, jackpots, fullScreen, grand, filled, total: sum + jackpots + grand };
         }
 
         function slotCountClovers(cells) {
@@ -2347,7 +2517,10 @@
             const el = document.createElement('div');
             el.className = 'sym';
             const name = SLOT.SYMBOLS[idx];
-            if (name === 'clover') el.innerHTML = cloverSvg('green');
+            if (name === 'clover') {
+                el.innerHTML = cloverSvg('green');
+                el.classList.add('base-clover');
+            }
             else if (name === 'seven') el.innerHTML = '<span class="seven">7</span>';
             else el.textContent = SYMBOL_EMOJI[name];
             return el;
@@ -2401,6 +2574,8 @@
             const quick = reducedMotion();
             const nearMiss = grid.slice(0, 4).flat().filter(s => s === SLOT_CLOVER).length >= 3;
             const jobs = [];
+            let cloversSeen = 0;
+            $('clover-count').hidden = true;
             for (let r = 0; r < 5; r++) {
                 const filler = Array.from({ length: 12 + r * 5 }, () => slotPick(SLOT.WEIGHTS, slotRnd));
                 const items = [...prev[r], ...filler, ...grid[r]];
@@ -2424,6 +2599,24 @@
                     reelEls[r].reel.classList.remove('anticipate');
                     tone(150, 0.1, 'sine', 0.22, 70);
                     tone(800, 0.03, 'square', 0.04, 450);
+                    let landedClovers = 0;
+                    grid[r].forEach((s, row) => {
+                        if (s !== SLOT_CLOVER) return;
+                        landedClovers++;
+                        const el = cellAtReel(r, row);
+                        el.classList.add('pop');
+                        burstAt(el, 4);
+                    });
+                    if (landedClovers) {
+                        cloversSeen += landedClovers;
+                        const pill = $('clover-count');
+                        pill.textContent = `YONCA ${cloversSeen}/${SLOT.TRIGGER}`;
+                        pill.hidden = false;
+                        pill.style.animation = 'none';
+                        void pill.offsetWidth;
+                        pill.style.animation = '';
+                        tone(700 + cloversSeen * 120, 0.15, 'triangle', 0.12, 1000 + cloversSeen * 120);
+                    }
                 }));
             }
             tone(220, 0.6, 'sawtooth', 0.025, 700);
@@ -2473,25 +2666,48 @@
         }
 
         // ---------- Clover Link feature ----------
-        function cloverLabel(c, bet) {
-            if (c.kind === 'credit') return formatAmount(c.mult * bet);
-            if (c.kind === 'gold') return '×' + c.mult;
+        function cloverLabel(c, bet, doubled) {
+            if (c.kind === 'credit' || c.kind === 'gold') return formatAmount(c.mult * bet * (doubled ? SLOT.FULL_SCREEN_MULT : 1));
             if (c.kind === 'red') return 'GRAND';
             return c.kind.toUpperCase();
         }
 
-        function setCloverCell(r, row, clover, bet, pop) {
+        function cellCenter(el) {
+            const r = el.getBoundingClientRect();
+            return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        }
+
+        function burstAt(el, count) {
+            const { x, y } = cellCenter(el);
+            sparkles(count, x, y);
+        }
+
+        function floatNum(text, el, cls = '') {
+            const machine = document.querySelector('.machine');
+            const m = machine.getBoundingClientRect();
+            const c = cellCenter(el);
+            const n = document.createElement('div');
+            n.className = 'float-num ' + cls;
+            n.textContent = text;
+            n.style.left = (c.x - m.left) + 'px';
+            n.style.top = (c.y - m.top) + 'px';
+            machine.appendChild(n);
+            setTimeout(() => n.remove(), 1000);
+        }
+
+        function setCloverCell(r, row, clover, bet, anim, doubled) {
             const el = cellAtReel(r, row);
             const color = clover.kind === 'red' ? 'red' : clover.kind === 'gold' ? 'gold' : 'green';
-            const extra = clover.kind === 'red' ? ' red-clover' : clover.kind === 'gold' ? ' gold-clover' : clover.kind === 'credit' ? '' : ' jackpot-clover';
-            el.className = 'sym clover-cell' + extra + (pop ? ' pop' : '');
-            el.innerHTML = `${cloverSvg(color)}<span class="val">${cloverLabel(clover, bet)}</span>`;
+            const kindClass = clover.kind === 'red' ? ' red-clover' : clover.kind === 'gold' ? ' gold-clover'
+                : clover.kind === 'credit' ? '' : ` jackpot-clover jp-${clover.kind}`;
+            el.className = 'sym clover-cell locked' + kindClass + (anim ? (kindClass.includes('jackpot') || clover.kind === 'red' ? ' flip' : ' pop') : '');
+            el.innerHTML = `${cloverSvg(color)}<span class="val">${cloverLabel(clover, bet, doubled)}</span><b class="shock"></b>`;
         }
 
         function renderFeature(cells, bet) {
             cells.forEach((col, r) => col.forEach((c, row) => {
                 if (c) {
-                    setCloverCell(r, row, c, bet, false);
+                    setCloverCell(r, row, c, bet, false, false);
                 } else {
                     const el = cellAtReel(r, row);
                     el.className = 'sym empty';
@@ -2500,14 +2716,40 @@
             }));
         }
 
-        function updateHud(left, cells) {
-            $('hud-respins').textContent = `RESPIN ${left}`;
-            $('hud-total').textContent = `YONCA ${slotCountClovers(cells)}/15`;
+        function buildGrandSlots() {
+            const g = $('hud-grand');
+            g.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'gslot';
+                slot.innerHTML = cloverSvg('red');
+                g.appendChild(slot);
+            }
         }
 
-        async function banner(text, ms) {
+        function updateHud(left, cells, pulse) {
+            const respins = $('hud-respins');
+            respins.textContent = `RESPIN ${left}`;
+            respins.classList.remove('reset', 'low');
+            void respins.offsetWidth;
+            if (pulse === 'reset') respins.classList.add('reset');
+            else if (left === 1) respins.classList.add('low');
+            $('clover-count').textContent = `YONCA ${slotCountClovers(cells)}/15`;
+            const reds = cells.flat().filter(c => c && c.kind === 'red').length;
+            [...$('hud-grand').children].forEach((el, i) => el.classList.toggle('lit', i < reds));
+        }
+
+        function flashJackpot(kind) {
+            const el = $('jp-' + kind)?.parentElement;
+            if (!el) return;
+            el.classList.remove('hit');
+            void el.offsetWidth;
+            el.classList.add('hit');
+        }
+
+        async function banner(html, ms) {
             const b = $('slot-banner');
-            b.textContent = text;
+            b.innerHTML = html;
             b.hidden = false;
             b.style.animation = 'none';
             void b.offsetWidth;
@@ -2516,33 +2758,88 @@
             b.hidden = true;
         }
 
+        const bannerClover = text => `<span class="emblem">${cloverSvg('gold')}</span>${text}<span class="emblem">${cloverSvg('gold')}</span>`;
+
+        function startRolling() {
+            document.querySelectorAll('#reels .sym.empty').forEach(el => {
+                el.classList.add('rolling');
+                el.innerHTML = '<div class="mini-reel">' + `<i></i><i class="c">${cloverSvg('green')}</i>`.repeat(2) + '</div>';
+            });
+        }
+
+        function stopRolling() {
+            document.querySelectorAll('#reels .sym.rolling').forEach(el => {
+                el.classList.remove('rolling');
+                el.innerHTML = '';
+            });
+        }
+
         async function runFeature(grid, bet) {
             const cells = slotFeatureStart(grid, slotRnd);
+            const machine = document.querySelector('.machine');
+            machine.classList.add('feature-on');
             $('reels').classList.add('feature');
+            $('clover-count').hidden = false;
+            buildGrandSlots();
+
+            // Intro: other symbols fall away, clovers lock in
             [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, f, i * 0.1));
-            await banner('CLOVER LINK', 1500);
+            vibrate([40, 30, 40]);
+            document.querySelectorAll('#reels .sym').forEach(el => {
+                el.style.setProperty('--d', Math.random() * 250 + 'ms');
+                el.classList.add(el.classList.contains('base-clover') ? 'lock-in' : 'drop-away');
+                if (el.classList.contains('lock-in')) burstAt(el, 6);
+            });
+            await banner(bannerClover('CLOVER LINK'), 1600);
             renderFeature(cells, bet);
+            cells.flat().forEach(c => {
+                if (c && (c.kind === 'mini' || c.kind === 'minor' || c.kind === 'major')) flashJackpot(c.kind);
+            });
             $('feature-hud').hidden = false;
             let left = SLOT.RESPINS;
-            updateHud(left, cells);
+            $('hud-total').textContent = 'TOPLAM 0';
+            updateHud(left, cells, 'reset');
 
             while (left > 0 && slotCountClovers(cells) < 15) {
-                await sleep(500);
-                document.querySelectorAll('#reels .sym.empty').forEach(el => el.classList.add('rolling'));
+                await sleep(550);
+                startRolling();
                 const landed = slotRespin(cells, slotRnd);
-                for (let i = 0; i < 4; i++) { tone(700 + i * 60, 0.05, 'triangle', 0.05, 500, i * 0.2); }
-                await sleep(reducedMotion() ? 300 : 900);
-                document.querySelectorAll('#reels .sym.rolling').forEach(el => el.classList.remove('rolling'));
+                for (let i = 0; i < 6; i++) tone(650 + (i % 3) * 70, 0.05, 'triangle', 0.05, 450, i * 0.15);
+                await sleep(reducedMotion() ? 300 : 1000);
+                stopRolling();
                 for (const { r, row, clover } of landed) {
-                    setCloverCell(r, row, clover, bet, true);
+                    setCloverCell(r, row, clover, bet, true, false);
+                    const el = cellAtReel(r, row);
                     tone(900 + Math.random() * 300, 0.12, 'triangle', 0.12, 1500);
+                    burstAt(el, clover.kind === 'credit' ? 5 : 14);
+                    if (clover.kind === 'mini' || clover.kind === 'minor' || clover.kind === 'major') flashJackpot(clover.kind);
+                    if (clover.kind === 'red') {
+                        tone(330, 0.5, 'sawtooth', 0.06, 660);
+                        vibrate(40);
+                    }
                 }
-                vibrate(landed.length ? 20 : 0);
+                if (landed.length) vibrate(15);
                 left = landed.length ? SLOT.RESPINS : left - 1;
-                updateHud(left, cells);
+                updateHud(left, cells, landed.length ? 'reset' : '');
             }
 
-            await sleep(500);
+            await sleep(600);
+            const result = slotFeatureTotal(cells, bet);
+
+            if (result.fullScreen) {
+                await banner(bannerClover('FULL SCREEN ×' + SLOT.FULL_SCREEN_MULT), 1500);
+                cells.forEach((col, r) => col.forEach((c, row) => {
+                    if (c && (c.kind === 'credit' || c.kind === 'gold')) {
+                        const el = cellAtReel(r, row);
+                        el.querySelector('.val').textContent = cloverLabel(c, bet, true);
+                        el.classList.add('collect');
+                        setTimeout(() => el.classList.remove('collect'), 300);
+                    }
+                }));
+                tone(400, 0.5, 'sawtooth', 0.06, 1200);
+                await sleep(700);
+            }
+
             let running = 0;
             let step = 0;
             for (let r = 0; r < 5; r++) {
@@ -2550,28 +2847,40 @@
                     const c = cells[r][row];
                     if (!c) continue;
                     const el = cellAtReel(r, row);
+                    let value = slotCloverValue(c, bet);
+                    if (result.fullScreen && (c.kind === 'credit' || c.kind === 'gold')) value *= SLOT.FULL_SCREEN_MULT;
                     el.classList.add('collect');
-                    running += slotCloverValue(c, bet);
+                    running += value;
+                    if (value > 0) floatNum('+' + formatAmount(value), el, c.kind === 'credit' ? '' : 'big');
+                    burstAt(el, c.kind === 'credit' ? 3 : 10);
                     $('hud-total').textContent = 'TOPLAM ' + Math.round(running).toLocaleString('tr-TR');
                     tone(500 + step * 45, 0.08, 'triangle', 0.1, 700 + step * 45);
                     step++;
-                    await sleep(reducedMotion() ? 40 : 170);
+                    await sleep(reducedMotion() ? 40 : 200);
                     el.classList.remove('collect');
                 }
             }
-            const result = slotFeatureTotal(cells, bet);
-            if (result.golden > 1) {
-                await banner('ALTIN ×' + result.golden, 1300);
-                $('hud-total').textContent = 'TOPLAM ' + Math.round(result.sum * result.golden).toLocaleString('tr-TR');
-            }
+
             if (result.grand) {
-                await banner('GRAND JACKPOT', 1600);
+                const flash = $('win-flash');
+                flash.classList.remove('go');
+                void flash.offsetWidth;
+                flash.classList.add('go');
+                coinRain(110);
+                confetti(260, $('reels'));
+                [392, 523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.4, 'triangle', 0.14, f, i * 0.08));
+                vibrate([80, 50, 80, 50, 200]);
+                flashJackpot('grand');
+                await banner(bannerClover('GRAND JACKPOT'), 2200);
                 $('hud-total').textContent = 'TOPLAM ' + Math.round(result.total).toLocaleString('tr-TR');
             }
-            await sleep(600);
+            await sleep(700);
 
             $('feature-hud').hidden = true;
+            $('clover-count').hidden = true;
+            machine.classList.remove('feature-on');
             $('reels').classList.remove('feature');
+            document.querySelectorAll('#reels .sym').forEach(el => el.style.removeProperty('--d'));
             grid.forEach((col, r) => setStrip(r, col));
             slotGrid = grid.map(col => col.slice());
             return result.total;
@@ -2709,9 +3018,10 @@
                     <li>Yıldız hatta bakmaz, ekranın herhangi bir yerinde 3, 4 veya 5 adet toplam bahsi katlar.</li>
                     <li>Ekranda 5 veya daha fazla yonca Clover Link bonusunu açar. Yoncalar yerinde kalır, 3 respin verilir, her yeni yonca respinleri 3'e yeniler.</li>
                     <li>Yonca değerleri bahsin katıdır. MINI ${SLOT.JACKPOTS.mini}×, MINOR ${SLOT.JACKPOTS.minor}×, MAJOR ${SLOT.JACKPOTS.major}×.</li>
-                    <li>3 kırmızı yonca veya dolu ekran GRAND ${SLOT.JACKPOTS.grand}× kazandırır.</li>
-                    <li>Altın yonca bonus toplamını ×2, ×3 veya ×5 katlar (en çok ×${SLOT.GOLD_CAP}).</li>
-                    <li>Oyun parasıyla oynanır, teorik geri ödeme yaklaşık %94.</li>
+                    <li>Kırmızı GRAND yoncası yalnızca 1., 3. ve 5. makarada çıkar. Üçünü de toplarsanız GRAND ${SLOT.JACKPOTS.grand}× kazanırsınız.</li>
+                    <li>Altın yonca daha yüksek nakit taşır (bahsin 5× ile 50× arası).</li>
+                    <li>Dolu ekranda tüm nakit ve altın yonca değerleri ×${SLOT.FULL_SCREEN_MULT} olur, jackpotlar katlanmaz.</li>
+                    <li>Oyun parasıyla oynanır, teorik geri ödeme yaklaşık %93.</li>
                 </ul>`;
             $('pay-panel').hidden = false;
         }
