@@ -18,6 +18,8 @@
 
         * { box-sizing: border-box; }
 
+        [hidden] { display: none !important; }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -391,7 +393,7 @@
             z-index: 10;
         }
 
-        #mute-btn {
+        #mute-btn, #add-btn {
             background: var(--panel);
             color: var(--text);
             border: 1px solid rgba(226, 182, 70, 0.4);
@@ -400,6 +402,63 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        #mute-btn:disabled, #add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        #add-btn { color: var(--gold); }
+
+        #add-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #add-panel .card {
+            width: min(360px, 100%);
+            background: var(--felt-dark);
+            border: 2px solid var(--gold);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        #add-panel h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .presets .btn { padding: 12px; font-size: 1rem; }
+
+        .custom { display: flex; gap: 8px; }
+
+        .custom input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(226, 182, 70, 0.5);
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text);
+        }
+
+        #add-error { min-height: 1.2em; font-size: 0.85rem; color: #ff8a8a; }
 
         @media (prefers-reduced-motion: reduce) {
             #spin-btn:not(:disabled) { animation: none; }
@@ -510,6 +569,7 @@
             <div class="stat"><span>Bakiye</span><strong id="balance">0</strong></div>
             <div class="stat"><span>Toplam Bahis</span><strong id="total-bet">0</strong></div>
             <div class="stat"><span>Son Kazanç</span><strong id="last-win">0</strong></div>
+            <button id="add-btn" type="button">+ Bakiye</button>
             <button id="mute-btn" type="button">Ses: Açık</button>
         </div>
     </header>
@@ -550,6 +610,18 @@
         </section>
     </main>
 
+    <div id="add-panel" hidden>
+        <div class="card" role="dialog" aria-labelledby="add-title">
+            <h2 id="add-title">Bakiye Ekle</h2>
+            <div class="presets" id="presets"></div>
+            <div class="custom">
+                <input id="add-input" type="number" inputmode="numeric" min="1" max="1000000" step="1" placeholder="Başka tutar">
+                <button class="btn" id="add-custom" type="button">Ekle</button>
+            </div>
+            <div id="add-error"></div>
+            <button class="btn" id="add-close" type="button">Kapat</button>
+        </div>
+    </div>
     <div id="win-dim"></div>
     <div id="win-flash"></div>
     <div id="win-overlay" hidden><div class="wo-label"></div><div class="wo-amount"></div></div>
@@ -1284,6 +1356,7 @@
             $('clear-btn').disabled = spinning || !hasBets;
             $('rebet-btn').disabled = spinning || !Object.keys(lastBets).length;
             $('double-btn').disabled = spinning || !hasBets || totalBet() > balance;
+            $('add-btn').disabled = spinning;
             $('reset-btn').hidden = spinning || balance + totalBet() >= CHIPS[0].value;
             document.querySelectorAll('.chip').forEach(c => {
                 c.disabled = spinning;
@@ -1699,6 +1772,43 @@
         drawWheel();
         requestAnimationFrame(idle);
 
+        const MAX_ADD = 1000000;
+        const closeAdd = () => { $('add-panel').hidden = true; };
+
+        function addBalance(amount) {
+            if (spinning) return;
+            if (!Number.isInteger(amount) || amount < 1 || amount > MAX_ADD) {
+                $('add-error').textContent = `1 ile ${MAX_ADD.toLocaleString('tr-TR')} arasında tam sayı girin`;
+                return;
+            }
+            const before = balance;
+            balance += amount;
+            saveState();
+            update();
+            countUp($('balance'), before, balance, 700);
+            [880, 1175, 1568].forEach((f, i) => tone(f, 0.12, 'triangle', 0.1, f, i * 0.07));
+            setMessage(`+${amount.toLocaleString('tr-TR')} bakiye eklendi`, 'win');
+            closeAdd();
+        }
+
+        [500, 1000, 5000, 10000].forEach(v => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn';
+            b.textContent = '+' + v.toLocaleString('tr-TR');
+            b.addEventListener('click', () => addBalance(v));
+            $('presets').appendChild(b);
+        });
+        $('add-btn').addEventListener('click', () => {
+            $('add-error').textContent = '';
+            $('add-input').value = '';
+            $('add-panel').hidden = false;
+        });
+        $('add-custom').addEventListener('click', () => addBalance(Number($('add-input').value)));
+        $('add-input').addEventListener('keydown', e => { if (e.key === 'Enter') addBalance(Number($('add-input').value)); });
+        $('add-close').addEventListener('click', closeAdd);
+        $('add-panel').addEventListener('click', e => { if (e.target === $('add-panel')) closeAdd(); });
+
         $('mute-btn').textContent = muted ? 'Ses: Kapalı' : 'Ses: Açık';
         $('mute-btn').addEventListener('click', () => {
             muted = !muted;
@@ -1719,6 +1829,7 @@
             update();
         });
         document.addEventListener('keydown', e => {
+            if (e.code === 'Space' && !$('add-panel').hidden) return;
             if (e.code === 'Space') { e.preventDefault(); spin(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
         });
