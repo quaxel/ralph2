@@ -318,7 +318,7 @@
             </div>
 
             <div class="payouts">
-                Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
+                Minimum: sayılar 5 · dış bahisler 100 · toplam 100<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
             </div>
         </section>
     </main>
@@ -338,6 +338,12 @@
         const START_BALANCE = 1000;
         const SPIN_DURATION = 6000;
         const STORAGE_KEY = 'roulette-state';
+
+        const MIN_TOTAL = 100;
+        const MIN_NUMBER = 5;
+        const MIN_OUTSIDE = 100;
+        const isNumberBet = key => /^n\d+$/.test(key);
+        const minBetFor = key => isNumberBet(key) ? MIN_NUMBER : MIN_OUTSIDE;
 
         const colorOf = n => n === 0 ? 'green' : (REDS.has(n) ? 'red' : 'black');
 
@@ -733,6 +739,15 @@
 
         function spin() {
             if (spinning || !totalBet()) return;
+            const low = Object.entries(bets).find(([key, amount]) => amount < minBetFor(key));
+            if (low) {
+                setMessage(`${BET_TYPES[low[0]].label} için minimum bahis ${minBetFor(low[0])}${isNumberBet(low[0]) ? '' : ' (dış bahis)'}`, 'lose');
+                return;
+            }
+            if (totalBet() < MIN_TOTAL) {
+                setMessage(`Minimum toplam bahis ${MIN_TOTAL}`, 'lose');
+                return;
+            }
             spinning = true;
             restingPocket = -1;
             document.querySelectorAll('.cell.winner').forEach(el => el.classList.remove('winner'));
