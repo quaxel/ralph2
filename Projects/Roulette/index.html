@@ -151,7 +151,8 @@
             border-radius: 6px;
         }
 
-        .board { touch-action: none; }
+        .board { touch-action: none; position: relative; }
+        .chip-stack.multi { z-index: 2; }
 
         .board.vertical {
             grid-template-columns: 44px repeat(3, 1fr) 56px;
@@ -433,7 +434,7 @@
             </div>
 
             <div class="payouts">
-                Minimum: sayılar 5 · dış bahisler 100 · toplam 100<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
+                Minimum: sayı / split / köşe 5 · dış bahisler 100 · toplam 100<br>Kutu kenarına basın: split 17:1 · köşesine basın: 4'lü 8:1<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
             </div>
         </section>
     </main>
@@ -459,7 +460,7 @@
         const MIN_TOTAL = 100;
         const MIN_NUMBER = 5;
         const MIN_OUTSIDE = 100;
-        const isNumberBet = key => /^n\d+$/.test(key);
+        const isNumberBet = key => /^[nsc]\d/.test(key);
         const minBetFor = key => isNumberBet(key) ? MIN_NUMBER : MIN_OUTSIDE;
 
         const colorOf = n => n === 0 ? 'green' : (REDS.has(n) ? 'red' : 'black');
@@ -520,7 +521,7 @@
             el.style.gridRow = `${row} / span ${rowSpan}`;
             el.style.gridColumn = `${col} / span ${colSpan}`;
             el.dataset.key = key;
-            el.addEventListener('contextmenu', e => { e.preventDefault(); removeBet(key); });
+            el.addEventListener('contextmenu', e => { e.preventDefault(); removeBet(resolveTarget(el, e.clientX, e.clientY)); });
             board.appendChild(el);
             cellEls[key] = el;
         }
@@ -626,6 +627,20 @@
                     chip.textContent = formatAmount(bets[key]);
                     el.appendChild(chip);
                 }
+            }
+            board.querySelectorAll('.chip-stack.multi').forEach(c => c.remove());
+            for (const key of Object.keys(bets)) {
+                if (cellEls[key]) continue;
+                const els = BET_TYPES[key].nums.map(n => cellEls['n' + n]);
+                const cx = els.reduce((a, e) => a + e.offsetLeft + e.offsetWidth / 2, 0) / els.length;
+                const cy = els.reduce((a, e) => a + e.offsetTop + e.offsetHeight / 2, 0) / els.length;
+                const chip = document.createElement('div');
+                chip.className = 'chip-stack multi' + (renderedBets[key] !== bets[key] ? ' pop' : '');
+                chip.style.setProperty('--chip-color', chipColorFor(bets[key]));
+                chip.style.left = (cx - 13) + 'px';
+                chip.style.top = (cy - 13) + 'px';
+                chip.textContent = formatAmount(bets[key]);
+                board.appendChild(chip);
             }
             renderedBets = { ...bets };
         }
@@ -1171,6 +1186,56 @@
             requestAnimationFrame(idle);
         }
 
+        // Pressing near the edge or corner of a number cell bets on 2 or 4 adjacent numbers
+        function numOf(el) {
+            const m = /^n(\d+)$/.exec(el?.dataset.key || '');
+            return m && +m[1] >= 1 ? +m[1] : null;
+        }
+
+        function cellAt(x, y) {
+            const c = document.elementFromPoint(x, y)?.closest('.cell');
+            return c && board.contains(c) ? c : null;
+        }
+
+        function multiKey(nums) {
+            nums = [...new Set(nums)].sort((a, b) => a - b);
+            const key = (nums.length === 2 ? 's' : 'c') + nums.join('_');
+            if (!BET_TYPES[key]) {
+                BET_TYPES[key] = { label: nums.join('/'), payout: nums.length === 2 ? 17 : 8, nums, wins: r => nums.includes(r) };
+            }
+            return key;
+        }
+
+        function resolveTarget(cell, x, y) {
+            const n = numOf(cell);
+            if (n === null) return cell.dataset.key;
+            const r = cell.getBoundingClientRect();
+            const dx = (x - r.left) / r.width;
+            const dy = (y - r.top) / r.height;
+            const Z = 0.25, OFF = 6;
+            const sx = dx < Z ? -1 : dx > 1 - Z ? 1 : 0;
+            const sy = dy < Z ? -1 : dy > 1 - Z ? 1 : 0;
+            if (!sx && !sy) return cell.dataset.key;
+            const px = sx < 0 ? r.left - OFF : r.right + OFF;
+            const py = sy < 0 ? r.top - OFF : r.bottom + OFF;
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const h = sx ? numOf(cellAt(px, cy)) : null;
+            const v = sy ? numOf(cellAt(cx, py)) : null;
+            if (sx && sy) {
+                const d = numOf(cellAt(px, py));
+                if (h && v && d) return multiKey([n, h, v, d]);
+                const horizontalCloser = Math.min(dx, 1 - dx) < Math.min(dy, 1 - dy);
+                const first = horizontalCloser ? h : v;
+                const second = horizontalCloser ? v : h;
+                if (first) return multiKey([n, first]);
+                if (second) return multiKey([n, second]);
+            } else if (h || v) {
+                return multiKey([n, h || v]);
+            }
+            return cell.dataset.key;
+        }
+
         // Press or swipe across the board to place one chip on each cell touched
         let swipeVisited = null;
 
@@ -1183,8 +1248,10 @@
 
         board.addEventListener('pointerdown', e => {
             if (e.button !== 0 || spinning) return;
-            swipeVisited = new Set();
-            swipePlace(e.clientX, e.clientY);
+            const cell = cellAt(e.clientX, e.clientY);
+            if (!cell) return;
+            swipeVisited = new Set([cell.dataset.key]);
+            placeBet(resolveTarget(cell, e.clientX, e.clientY));
         });
         board.addEventListener('pointermove', e => {
             if (swipeVisited) swipePlace(e.clientX, e.clientY);
@@ -1194,6 +1261,7 @@
 
         // ---------- Init ----------
         window.matchMedia('(max-width: 800px)').addEventListener('change', buildBoard);
+        window.addEventListener('resize', renderBets);
         loadState();
         buildBoard();
         buildChips();
