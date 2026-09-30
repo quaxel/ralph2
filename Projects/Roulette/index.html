@@ -1299,8 +1299,7 @@
             renderBets();
             const hasBets = totalBet() > 0;
             $('spin-btn').disabled = spinning || !hasBets;
-            $('erase-btn').disabled = spinning || !totalBet();
-            if (eraser && !totalBet()) setEraser(false);
+            $('erase-btn').disabled = spinning;
             $('undo-btn').disabled = spinning || !actionStack.length;
             $('clear-btn').disabled = spinning || !hasBets;
             $('rebet-btn').disabled = spinning || !Object.keys(lastBets).length;
