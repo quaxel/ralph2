@@ -889,13 +889,103 @@
             .machine::before, .sym.base-clover svg, #slot-banner .emblem svg, .mini-reel { animation: none; }
         }
 
+        @keyframes machineShake {
+            10% { transform: translate(-5px, 3px) rotate(-0.4deg); }
+            30% { transform: translate(5px, -3px) rotate(0.4deg); }
+            50% { transform: translate(-4px, -2px); }
+            70% { transform: translate(4px, 2px); }
+            90% { transform: translate(-2px, 1px); }
+        }
+
+        @keyframes dropIn {
+            0% { transform: translateY(-330%); opacity: 0; }
+            55% { transform: translateY(6%); opacity: 1; }
+            72% { transform: translateY(-5%); }
+            100% { transform: none; }
+        }
+
+        @keyframes respinBig {
+            0% { scale: 0.3; opacity: 0; }
+            30% { scale: 1.25; opacity: 1; }
+            100% { scale: 1.6; opacity: 0; }
+        }
+
+        @keyframes totalBump {
+            40% { transform: scale(1.18); color: #fff; }
+        }
+
+        .machine.feature-on { z-index: 16; }
+        .machine.shake { animation: machineShake 0.45s; }
+        .sym.drop-in { animation: dropIn 0.6s cubic-bezier(0.3, 0.7, 0.4, 1); z-index: 3; }
+        .sym.drop-in .shock { animation: shock 0.7s ease-out 0.35s; }
+
+        .respin-big {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 44%;
+            z-index: 7;
+            text-align: center;
+            font-size: clamp(4rem, 22vw, 7rem);
+            font-weight: 900;
+            color: #ffe27a;
+            text-shadow: 0 0 6px #000, 0 4px 14px #000, 0 0 34px rgba(226, 182, 70, 0.95);
+            pointer-events: none;
+            animation: respinBig 0.85s ease-out forwards;
+        }
+
+        .respin-big.low { color: #ff8a8a; text-shadow: 0 0 6px #000, 0 4px 14px #000, 0 0 30px rgba(255, 90, 90, 0.95); }
+
+        #hud-total.bump2 { animation: totalBump 0.3s ease-out; }
+
+        .clover-fly {
+            position: fixed;
+            z-index: 19;
+            width: 34px;
+            height: 34px;
+            pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(255, 226, 122, 0.95));
+        }
+
+        .clover-fly svg { width: 100%; height: 100%; }
+
+        #bonus-rays {
+            position: fixed;
+            inset: 0;
+            z-index: 14;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #bonus-rays.show { opacity: 1; }
+
+        #bonus-rays::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 44%;
+            width: 220vmax;
+            height: 220vmax;
+            transform: translate(-50%, -50%);
+            background: repeating-conic-gradient(from 0deg, rgba(120, 255, 170, 0.22) 0deg 6deg, rgba(120, 255, 170, 0) 6deg 18deg);
+            -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 50%);
+            mask-image: radial-gradient(circle, #000 0%, transparent 50%);
+            animation: spinRays 18s linear infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .machine.shake, .sym.drop-in, .respin-big, #bonus-rays::before { animation: none; }
+        }
+
         #fx {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 18;
         }
 
         #mute-btn, #add-btn {
@@ -1185,6 +1275,7 @@
         </div>
     </div>
     <div id="win-dim"></div>
+    <div id="bonus-rays"></div>
     <div id="win-flash"></div>
     <div id="win-overlay" hidden><div class="wo-label"></div><div class="wo-amount"></div></div>
     <canvas id="fx"></canvas>
@@ -1551,6 +1642,37 @@
             fxCtx.restore();
         }
 
+        function drawLeaf(x, y, size, rot) {
+            fxCtx.save();
+            fxCtx.translate(x, y);
+            fxCtx.rotate(rot);
+            fxCtx.fillStyle = '#2ecc71';
+            fxCtx.strokeStyle = '#0e5d2c';
+            fxCtx.lineWidth = 1;
+            for (let i = 0; i < 4; i++) {
+                fxCtx.rotate(Math.PI / 2);
+                fxCtx.beginPath();
+                fxCtx.arc(size * 0.5, 0, size * 0.5, 0, Math.PI * 2);
+                fxCtx.fill();
+                fxCtx.stroke();
+            }
+            fxCtx.restore();
+        }
+
+        // Clover leaves drifting down the screen
+        function leafRain(count) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * fx.width, y: -20,
+                    vx: (Math.random() - 0.5) * 1.5, vy: 1 + Math.random() * 2,
+                    w: 7 + Math.random() * 8, h: 0, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.08,
+                    color: '#2ecc71', life: 3.2, leaf: true
+                });
+            }
+            startFx();
+        }
+
         function drawStar(x, y, r, color) {
             fxCtx.save();
             fxCtx.translate(x, y);
@@ -1621,7 +1743,7 @@
             });
             particles = particles.filter(p => p.life > 0 && p.y < fx.height + 20);
             for (const p of particles) {
-                p.vy += p.star ? 0.02 : 0.3;
+                p.vy += (p.star || p.leaf) ? 0.02 : 0.3;
                 p.vx *= 0.99;
                 p.x += p.vx;
                 p.y += p.vy;
@@ -1631,6 +1753,10 @@
                 fxCtx.globalAlpha = Math.max(Math.min(p.life * 2, 1), 0);
                 if (p.coin) {
                     drawCoin(p.x, p.y, Math.abs(Math.cos(p.rot)));
+                } else if (p.leaf) {
+                    p.vx += Math.sin(p.rot * 2) * 0.06;
+                    p.vy = Math.min(p.vy, 3);
+                    drawLeaf(p.x, p.y, p.w, p.rot);
                 } else if (p.star) {
                     drawStar(p.x, p.y, p.w * (0.6 + 0.4 * Math.sin(p.rot * 3)), p.color);
                 } else {
@@ -2700,7 +2826,7 @@
             const color = clover.kind === 'red' ? 'red' : clover.kind === 'gold' ? 'gold' : 'green';
             const kindClass = clover.kind === 'red' ? ' red-clover' : clover.kind === 'gold' ? ' gold-clover'
                 : clover.kind === 'credit' ? '' : ` jackpot-clover jp-${clover.kind}`;
-            el.className = 'sym clover-cell locked' + kindClass + (anim ? (kindClass.includes('jackpot') || clover.kind === 'red' ? ' flip' : ' pop') : '');
+            el.className = 'sym clover-cell locked' + kindClass + (anim ? (kindClass.includes('jackpot') || clover.kind === 'red' ? ' flip' : ' drop-in') : '');
             el.innerHTML = `${cloverSvg(color)}<span class="val">${cloverLabel(clover, bet, doubled)}</span><b class="shock"></b>`;
         }
 
@@ -2774,116 +2900,204 @@
             });
         }
 
+        function shakeMachine(ms = 450) {
+            const m = document.querySelector('.machine');
+            m.classList.remove('shake');
+            void m.offsetWidth;
+            m.classList.add('shake');
+            setTimeout(() => m.classList.remove('shake'), ms);
+        }
+
+        function flashScreen() {
+            const flash = $('win-flash');
+            flash.classList.remove('go');
+            void flash.offsetWidth;
+            flash.classList.add('go');
+        }
+
+        function respinPop(text, cls = '') {
+            const n = document.createElement('div');
+            n.className = 'respin-big ' + cls;
+            n.textContent = text;
+            document.querySelector('.machine').appendChild(n);
+            setTimeout(() => n.remove(), 900);
+        }
+
+        // A clover flies from its cell into the running total
+        function cloverFly(el, color) {
+            if (reducedMotion()) return;
+            const from = cellCenter(el);
+            const to = cellCenter($('hud-total'));
+            const d = document.createElement('div');
+            d.className = 'clover-fly';
+            d.innerHTML = cloverSvg(color);
+            d.style.left = from.x + 'px';
+            d.style.top = from.y + 'px';
+            document.body.appendChild(d);
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            d.animate([
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${dx * 0.4}px), calc(-50% + ${dy * 0.4 - 50}px)) scale(1.3) rotate(180deg)`, opacity: 1, offset: 0.4 },
+                { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.3) rotate(360deg)`, opacity: 0.3 }
+            ], { duration: 700, easing: 'cubic-bezier(0.4, 0, 0.6, 1)' }).onfinish = () => d.remove();
+        }
+
+        function pulseTotal() {
+            const t = $('hud-total');
+            t.classList.remove('bump2');
+            void t.offsetWidth;
+            t.classList.add('bump2');
+        }
+
+        function jackpotHit(kind, el) {
+            floatNum(kind.toUpperCase() + '!', el, 'big');
+            flashJackpot(kind);
+            shakeMachine(500);
+            burstAt(el, kind === 'major' ? 40 : 22);
+            const notes = kind === 'major' ? [523, 659, 784, 1047, 1319] : kind === 'minor' ? [523, 659, 784, 1047] : [523, 659, 784];
+            notes.forEach((f, i) => tone(f, 0.25, 'triangle', 0.13, f, i * 0.07));
+            if (kind === 'major') {
+                flashScreen();
+                confetti(120, el);
+                vibrate([50, 30, 50, 30, 100]);
+            }
+        }
+
         async function runFeature(grid, bet) {
             const cells = slotFeatureStart(grid, slotRnd);
             const machine = document.querySelector('.machine');
             machine.classList.add('feature-on');
             $('reels').classList.add('feature');
             $('clover-count').hidden = false;
+            $('win-dim').classList.add('show');
+            $('bonus-rays').classList.add('show');
             buildGrandSlots();
+            const leaves = setInterval(() => leafRain(4), 350);
+            try {
+                // Intro: bass hit, other symbols fall away, clovers lock in, leaves rain down
+                tone(70, 0.9, 'sine', 0.35, 35);
+                [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, f, 0.15 + i * 0.1));
+                vibrate([40, 30, 40]);
+                shakeMachine(600);
+                leafRain(70);
+                document.querySelectorAll('#reels .sym').forEach(el => {
+                    el.style.setProperty('--d', Math.random() * 250 + 'ms');
+                    el.classList.add(el.classList.contains('base-clover') ? 'lock-in' : 'drop-away');
+                    if (el.classList.contains('lock-in')) burstAt(el, 8);
+                });
+                await banner(bannerClover('CLOVER LINK'), 1900);
+                renderFeature(cells, bet);
+                cells.flat().forEach(c => {
+                    if (c && (c.kind === 'mini' || c.kind === 'minor' || c.kind === 'major')) flashJackpot(c.kind);
+                });
+                $('feature-hud').hidden = false;
+                $('hud-total').textContent = 'TOPLAM 0';
+                let left = SLOT.RESPINS;
+                updateHud(left, cells, 'reset');
+                respinPop(String(left), '');
 
-            // Intro: other symbols fall away, clovers lock in
-            [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, f, i * 0.1));
-            vibrate([40, 30, 40]);
-            document.querySelectorAll('#reels .sym').forEach(el => {
-                el.style.setProperty('--d', Math.random() * 250 + 'ms');
-                el.classList.add(el.classList.contains('base-clover') ? 'lock-in' : 'drop-away');
-                if (el.classList.contains('lock-in')) burstAt(el, 6);
-            });
-            await banner(bannerClover('CLOVER LINK'), 1600);
-            renderFeature(cells, bet);
-            cells.flat().forEach(c => {
-                if (c && (c.kind === 'mini' || c.kind === 'minor' || c.kind === 'major')) flashJackpot(c.kind);
-            });
-            $('feature-hud').hidden = false;
-            let left = SLOT.RESPINS;
-            $('hud-total').textContent = 'TOPLAM 0';
-            updateHud(left, cells, 'reset');
-
-            while (left > 0 && slotCountClovers(cells) < 15) {
-                await sleep(550);
-                startRolling();
-                const landed = slotRespin(cells, slotRnd);
-                for (let i = 0; i < 6; i++) tone(650 + (i % 3) * 70, 0.05, 'triangle', 0.05, 450, i * 0.15);
-                await sleep(reducedMotion() ? 300 : 1000);
-                stopRolling();
-                for (const { r, row, clover } of landed) {
-                    setCloverCell(r, row, clover, bet, true, false);
-                    const el = cellAtReel(r, row);
-                    tone(900 + Math.random() * 300, 0.12, 'triangle', 0.12, 1500);
-                    burstAt(el, clover.kind === 'credit' ? 5 : 14);
-                    if (clover.kind === 'mini' || clover.kind === 'minor' || clover.kind === 'major') flashJackpot(clover.kind);
-                    if (clover.kind === 'red') {
-                        tone(330, 0.5, 'sawtooth', 0.06, 660);
-                        vibrate(40);
-                    }
-                }
-                if (landed.length) vibrate(15);
-                left = landed.length ? SLOT.RESPINS : left - 1;
-                updateHud(left, cells, landed.length ? 'reset' : '');
-            }
-
-            await sleep(600);
-            const result = slotFeatureTotal(cells, bet);
-
-            if (result.fullScreen) {
-                await banner(bannerClover('FULL SCREEN ×' + SLOT.FULL_SCREEN_MULT), 1500);
-                cells.forEach((col, r) => col.forEach((c, row) => {
-                    if (c && (c.kind === 'credit' || c.kind === 'gold')) {
+                while (left > 0 && slotCountClovers(cells) < 15) {
+                    await sleep(700);
+                    startRolling();
+                    const landed = slotRespin(cells, slotRnd);
+                    tone(300, 1, 'sawtooth', 0.03, 900);
+                    for (let i = 0; i < 6; i++) tone(650 + (i % 3) * 70, 0.05, 'triangle', 0.05, 450, i * 0.15);
+                    await sleep(reducedMotion() ? 300 : 1100);
+                    stopRolling();
+                    for (const { r, row, clover } of landed) {
+                        setCloverCell(r, row, clover, bet, true, false);
                         const el = cellAtReel(r, row);
-                        el.querySelector('.val').textContent = cloverLabel(c, bet, true);
-                        el.classList.add('collect');
-                        setTimeout(() => el.classList.remove('collect'), 300);
+                        tone(120, 0.15, 'sine', 0.25, 60, 0.3);
+                        tone(900 + Math.random() * 300, 0.12, 'triangle', 0.12, 1500, 0.3);
+                        burstAt(el, clover.kind === 'credit' ? 6 : 16);
+                        if (clover.kind === 'mini' || clover.kind === 'minor' || clover.kind === 'major') {
+                            setTimeout(() => jackpotHit(clover.kind, el), 350);
+                        } else if (clover.kind === 'red') {
+                            tone(330, 0.5, 'sawtooth', 0.06, 660, 0.3);
+                            setTimeout(() => { shakeMachine(450); burstAt(el, 30); }, 350);
+                            vibrate(40);
+                        }
+                        if (!reducedMotion()) await sleep(170);
                     }
-                }));
-                tone(400, 0.5, 'sawtooth', 0.06, 1200);
-                await sleep(700);
-            }
-
-            let running = 0;
-            let step = 0;
-            for (let r = 0; r < 5; r++) {
-                for (let row = 0; row < 3; row++) {
-                    const c = cells[r][row];
-                    if (!c) continue;
-                    const el = cellAtReel(r, row);
-                    let value = slotCloverValue(c, bet);
-                    if (result.fullScreen && (c.kind === 'credit' || c.kind === 'gold')) value *= SLOT.FULL_SCREEN_MULT;
-                    el.classList.add('collect');
-                    running += value;
-                    if (value > 0) floatNum('+' + formatAmount(value), el, c.kind === 'credit' ? '' : 'big');
-                    burstAt(el, c.kind === 'credit' ? 3 : 10);
-                    $('hud-total').textContent = 'TOPLAM ' + Math.round(running).toLocaleString('tr-TR');
-                    tone(500 + step * 45, 0.08, 'triangle', 0.1, 700 + step * 45);
-                    step++;
-                    await sleep(reducedMotion() ? 40 : 200);
-                    el.classList.remove('collect');
+                    if (landed.length) vibrate(15);
+                    left = landed.length ? SLOT.RESPINS : left - 1;
+                    updateHud(left, cells, landed.length ? 'reset' : '');
+                    if (left > 0 || landed.length) respinPop(String(left), landed.length ? '' : 'low');
                 }
-            }
 
-            if (result.grand) {
-                const flash = $('win-flash');
-                flash.classList.remove('go');
-                void flash.offsetWidth;
-                flash.classList.add('go');
-                coinRain(110);
-                confetti(260, $('reels'));
-                [392, 523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.4, 'triangle', 0.14, f, i * 0.08));
-                vibrate([80, 50, 80, 50, 200]);
-                flashJackpot('grand');
-                await banner(bannerClover('GRAND JACKPOT'), 2200);
-                $('hud-total').textContent = 'TOPLAM ' + Math.round(result.total).toLocaleString('tr-TR');
-            }
-            await sleep(700);
+                await sleep(900);
+                const result = slotFeatureTotal(cells, bet);
 
-            $('feature-hud').hidden = true;
-            $('clover-count').hidden = true;
-            machine.classList.remove('feature-on');
-            $('reels').classList.remove('feature');
-            document.querySelectorAll('#reels .sym').forEach(el => el.style.removeProperty('--d'));
-            grid.forEach((col, r) => setStrip(r, col));
-            slotGrid = grid.map(col => col.slice());
-            return result.total;
+                if (result.fullScreen) {
+                    flashScreen();
+                    shakeMachine(600);
+                    await banner(bannerClover('FULL SCREEN ×' + SLOT.FULL_SCREEN_MULT), 1700);
+                    cells.forEach((col, r) => col.forEach((c, row) => {
+                        if (c && (c.kind === 'credit' || c.kind === 'gold')) {
+                            const el = cellAtReel(r, row);
+                            el.querySelector('.val').textContent = cloverLabel(c, bet, true);
+                            el.classList.add('collect');
+                            burstAt(el, 6);
+                            setTimeout(() => el.classList.remove('collect'), 300);
+                        }
+                    }));
+                    tone(400, 0.6, 'sawtooth', 0.06, 1200);
+                    await sleep(800);
+                }
+
+                let running = 0;
+                let step = 0;
+                for (let r = 0; r < 5; r++) {
+                    for (let row = 0; row < 3; row++) {
+                        const c = cells[r][row];
+                        if (!c) continue;
+                        const el = cellAtReel(r, row);
+                        let value = slotCloverValue(c, bet);
+                        if (result.fullScreen && (c.kind === 'credit' || c.kind === 'gold')) value *= SLOT.FULL_SCREEN_MULT;
+                        el.classList.add('collect');
+                        running += value;
+                        if (value > 0) floatNum('+' + formatAmount(value), el, c.kind === 'credit' ? '' : 'big');
+                        burstAt(el, c.kind === 'credit' ? 4 : 12);
+                        cloverFly(el, c.kind === 'red' ? 'red' : c.kind === 'gold' ? 'gold' : 'green');
+                        $('hud-total').textContent = 'TOPLAM ' + Math.round(running).toLocaleString('tr-TR');
+                        pulseTotal();
+                        tone(500 + step * 45, 0.08, 'triangle', 0.1, 700 + step * 45);
+                        step++;
+                        await sleep(reducedMotion() ? 40 : 230);
+                        el.classList.remove('collect');
+                    }
+                }
+                burstAt($('hud-total'), 26);
+
+                if (result.grand) {
+                    flashScreen();
+                    coinRain(120);
+                    leafRain(120);
+                    confetti(280, $('reels'));
+                    shakeMachine(700);
+                    [392, 523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.4, 'triangle', 0.14, f, i * 0.08));
+                    tone(60, 1, 'sine', 0.4, 30);
+                    vibrate([80, 50, 80, 50, 200]);
+                    flashJackpot('grand');
+                    await banner(bannerClover('GRAND JACKPOT'), 2600);
+                    $('hud-total').textContent = 'TOPLAM ' + Math.round(result.total).toLocaleString('tr-TR');
+                    pulseTotal();
+                }
+                await sleep(800);
+                return result.total;
+            } finally {
+                clearInterval(leaves);
+                $('feature-hud').hidden = true;
+                $('clover-count').hidden = true;
+                $('win-dim').classList.remove('show');
+                $('bonus-rays').classList.remove('show');
+                machine.classList.remove('feature-on');
+                $('reels').classList.remove('feature');
+                document.querySelectorAll('#reels .sym').forEach(el => el.style.removeProperty('--d'));
+                grid.forEach((col, r) => setStrip(r, col));
+                slotGrid = grid.map(col => col.slice());
+            }
         }
 
         // ---------- Spin flow ----------
