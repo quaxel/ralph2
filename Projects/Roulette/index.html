@@ -757,6 +757,8 @@
         // ---------- Betting ----------
         function placeBet(key, amount = selectedChip) {
             if (spinning) return;
+            const current = bets[key] || 0;
+            if (current + amount < minBetFor(key)) amount = minBetFor(key) - current;
             if (amount > balance) {
                 setMessage('Yetersiz bakiye', 'lose');
                 return;
