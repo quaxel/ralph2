@@ -1241,15 +1241,18 @@
             return null;
         }
 
-        function resolveTarget(cell, x, y) {
+        function resolveTarget(cell, x, y, dir) {
             const n = numOf(cell);
             if (n === null || n === 0) return cell.dataset.key;
             const r = cell.getBoundingClientRect();
             const dx = (x - r.left) / r.width;
             const dy = (y - r.top) / r.height;
             const Z = 0.25, OFF = 6;
-            const sx = dx < Z ? -1 : dx > 1 - Z ? 1 : 0;
-            const sy = dy < Z ? -1 : dy > 1 - Z ? 1 : 0;
+            let sx = dx < Z ? -1 : dx > 1 - Z ? 1 : 0;
+            let sy = dy < Z ? -1 : dy > 1 - Z ? 1 : 0;
+            // While swiping through a cell's middle, crossing its side edge is not a split
+            if (dir && !sy && sx && Math.abs(dir.x) >= Math.abs(dir.y)) sx = 0;
+            if (dir && !sx && sy && Math.abs(dir.y) > Math.abs(dir.x)) sy = 0;
             if (!sx && !sy) return cell.dataset.key;
             const px = sx < 0 ? r.left - OFF : r.right + OFF;
             const py = sy < 0 ? r.top - OFF : r.bottom + OFF;
@@ -1275,20 +1278,31 @@
 
         // Press or swipe across the board to place one chip on each cell touched
         let swipeVisited = null;
+        let swipeLast = null;
+        let swipeDir = { x: 1, y: 0 };
 
         function swipePlace(x, y) {
-            const cell = document.elementFromPoint(x, y)?.closest('.cell');
-            if (!cell || !board.contains(cell) || swipeVisited.has(cell.dataset.key)) return;
-            swipeVisited.add(cell.dataset.key);
-            placeBet(cell.dataset.key);
+            const dist = Math.hypot(x - swipeLast.x, y - swipeLast.y);
+            if (dist >= 4) {
+                swipeDir = { x: x - swipeLast.x, y: y - swipeLast.y };
+                swipeLast = { x, y };
+            }
+            const cell = cellAt(x, y);
+            if (!cell) return;
+            const key = resolveTarget(cell, x, y, swipeDir);
+            if (swipeVisited.has(key)) return;
+            swipeVisited.add(key);
+            placeBet(key);
         }
 
         board.addEventListener('pointerdown', e => {
             if (e.button !== 0 || spinning) return;
             const cell = cellAt(e.clientX, e.clientY);
             if (!cell) return;
-            swipeVisited = new Set([cell.dataset.key]);
-            placeBet(resolveTarget(cell, e.clientX, e.clientY));
+            const key = resolveTarget(cell, e.clientX, e.clientY);
+            swipeVisited = new Set([key]);
+            swipeLast = { x: e.clientX, y: e.clientY };
+            placeBet(key);
         });
         board.addEventListener('pointermove', e => {
             if (swipeVisited) swipePlace(e.clientX, e.clientY);
