@@ -388,6 +388,353 @@
 
         #win-overlay.big .wo-label { color: #ffe27a; letter-spacing: 10px; }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--panel);
+            border: 1px solid rgba(226, 182, 70, 0.4);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .tab {
+            border: none;
+            border-radius: 7px;
+            padding: 6px 14px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .tab.active { background: var(--gold); color: #1a1a1a; }
+        .tab:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .slot {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .jackpots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .jp {
+            background: var(--panel);
+            border: 1px solid rgba(226, 182, 70, 0.4);
+            border-radius: 8px;
+            padding: 5px 4px;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .jp span {
+            display: block;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .jp strong {
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+            color: var(--gold);
+        }
+
+        .jp.grand { border-color: #ff5a5a; }
+        .jp.grand strong { color: #ff8a8a; }
+
+        .machine {
+            position: relative;
+            background: linear-gradient(#0d4a2f, #06301f);
+            border: 3px solid var(--gold);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .reels {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            background: #1b1205;
+            padding: 6px;
+            border-radius: 10px;
+            touch-action: none;
+        }
+
+        .reel {
+            container-type: inline-size;
+            aspect-ratio: 1 / 3;
+            overflow: hidden;
+            background: #fbf5e3;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .reels.feature .reel { background: #0b1f16; }
+        .reel.anticipate { box-shadow: 0 0 0 3px var(--gold), 0 0 22px rgba(226, 182, 70, 0.95); z-index: 1; }
+
+        .strip {
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+
+        .sym {
+            position: relative;
+            flex: none;
+            width: 100%;
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
+            font-size: 52cqw;
+            line-height: 1;
+        }
+
+        .sym svg { width: 80%; height: 80%; }
+
+        .sym .seven {
+            font-size: 62cqw;
+            font-weight: 900;
+            color: #d61f2c;
+            -webkit-text-stroke: 2px #6b0a10;
+            text-shadow: 0 0 8px rgba(226, 182, 70, 0.9);
+        }
+
+        .sym.win {
+            background: rgba(226, 182, 70, 0.45);
+            box-shadow: inset 0 0 0 3px var(--gold);
+            animation: symWin 0.6s ease-in-out infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes symWin {
+            from { scale: 1; }
+            to { scale: 1.08; }
+        }
+
+        .sym.empty::before {
+            content: '';
+            width: 34%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.18);
+        }
+
+        .sym.rolling::before {
+            border-color: rgba(226, 182, 70, 0.9);
+            animation: rollDot 0.35s linear infinite;
+        }
+
+        @keyframes rollDot {
+            to { rotate: 360deg; }
+        }
+
+        .sym.clover-cell svg { height: 66%; margin-top: -8%; }
+
+        .sym .val {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 7%;
+            text-align: center;
+            font-size: 17cqw;
+            font-weight: 800;
+            line-height: 1;
+            color: #fff;
+            text-shadow: 0 0 3px #000, 0 1px 3px #000;
+        }
+
+        .sym.gold-clover .val { color: #ffe27a; }
+        .sym.red-clover .val { color: #ff9a9a; }
+        .sym.jackpot-clover .val { color: #ffe27a; font-size: 15cqw; }
+        .sym.pop { animation: cloverPop 0.45s ease-out; }
+        .sym.collect { animation: collect 0.25s ease-out; background: rgba(226, 182, 70, 0.35); }
+
+        @keyframes cloverPop {
+            0% { scale: 0; rotate: -90deg; }
+            65% { scale: 1.3; rotate: 10deg; }
+            100% { scale: 1; rotate: 0deg; }
+        }
+
+        @keyframes collect {
+            50% { scale: 1.25; }
+        }
+
+        .lines-svg {
+            position: absolute;
+            inset: 6px;
+            width: calc(100% - 12px);
+            height: calc(100% - 12px);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .lines-svg polyline {
+            fill: none;
+            stroke: #ffe27a;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+            opacity: 0.85;
+            filter: drop-shadow(0 0 3px #000);
+        }
+
+        #slot-banner {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 42%;
+            z-index: 6;
+            text-align: center;
+            font-size: clamp(1.6rem, 9vw, 3rem);
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #ffe27a;
+            text-shadow: 0 0 4px #000, 0 3px 10px #000, 0 0 26px rgba(226, 182, 70, 0.9);
+            pointer-events: none;
+            transform: translateY(-50%);
+            animation: bannerIn 0.5s ease-out both;
+        }
+
+        @keyframes bannerIn {
+            0% { transform: translateY(-50%) scale(0.3); opacity: 0; }
+            60% { transform: translateY(-50%) scale(1.15); opacity: 1; }
+            100% { transform: translateY(-50%) scale(1); opacity: 1; }
+        }
+
+        #feature-hud {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        #feature-hud span {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: var(--gold);
+            font-variant-numeric: tabular-nums;
+        }
+
+        #slot-msg {
+            min-height: 1.6rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        #slot-msg.win { color: #7dff9a; }
+        #slot-msg.lose { color: #ff8a8a; }
+
+        .slot-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .bet-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bet-box .btn { padding: 8px 14px; font-size: 1.1rem; }
+
+        .bet-val {
+            min-width: 4.2rem;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bet-val span {
+            display: block;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .bet-val strong { font-size: 1.15rem; color: var(--gold); }
+
+        #slot-spin {
+            background: radial-gradient(circle at 35% 30%, #5be38d, #14803f);
+            color: #fff;
+            border: 3px solid var(--gold);
+            border-radius: 50%;
+            width: 76px;
+            height: 76px;
+            font-weight: 900;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        #slot-spin:not(:disabled) { animation: glow 1.8s ease-in-out infinite; }
+        #slot-spin:disabled { filter: grayscale(0.7); cursor: not-allowed; }
+
+        .slot-side { display: flex; flex-direction: column; gap: 6px; }
+        #slot-auto.active { background: var(--gold); color: #1a1a1a; }
+
+        #pay-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #pay-panel .card {
+            width: min(420px, 100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            background: var(--felt-dark);
+            border: 2px solid var(--gold);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #pay-panel h2 { margin: 0; font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); }
+        #pay-panel ul { margin: 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.5; }
+
+        .pay-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        .pay-table td, .pay-table th { padding: 4px 6px; text-align: right; font-size: 0.85rem; }
+        .pay-table td:first-child, .pay-table th:first-child { text-align: left; }
+        .pay-table th { color: var(--gold); font-size: 0.7rem; letter-spacing: 1px; }
+        .pay-table .ico { display: inline-block; width: 1.6em; text-align: center; }
+
         #fx {
             position: fixed;
             inset: 0;
@@ -575,7 +922,13 @@
 <body>
 
     <header>
-        <h1>Rulet</h1>
+        <div class="brand">
+            <h1 id="game-title">Rulet</h1>
+            <nav class="tabs" role="tablist" aria-label="Oyun seçimi">
+                <button id="tab-roulette" class="tab active" type="button" role="tab" aria-selected="true">Rulet</button>
+                <button id="tab-slot" class="tab" type="button" role="tab" aria-selected="false">Slot</button>
+            </nav>
+        </div>
         <div class="stats">
             <div class="stat"><span>Bakiye</span><strong id="balance">0</strong></div>
             <div class="stat"><span>Toplam Bahis</span><strong id="total-bet">0</strong></div>
@@ -585,7 +938,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="roulette-view">
         <section class="wheel-area">
             <div class="wheel-wrap">
                 <canvas id="wheel" width="760" height="760"></canvas>
@@ -624,6 +977,31 @@
         </section>
     </main>
 
+    <section id="slot-view" class="slot" hidden>
+        <div class="jackpots" id="jackpots"></div>
+
+        <div class="machine">
+            <div class="reels" id="reels"></div>
+            <div id="slot-banner" hidden></div>
+            <div id="feature-hud" hidden><span id="hud-respins"></span><span id="hud-total"></span></div>
+        </div>
+
+        <div id="slot-msg">Çevirmek için ÇEVİR'e basın veya makaraları kaydırın</div>
+
+        <div class="slot-controls">
+            <div class="bet-box">
+                <button class="btn" id="bet-down" type="button" aria-label="Bahsi azalt">−</button>
+                <div class="bet-val"><span>Bahis</span><strong id="bet-value">0</strong></div>
+                <button class="btn" id="bet-up" type="button" aria-label="Bahsi artır">+</button>
+            </div>
+            <button id="slot-spin" type="button">ÇEVİR</button>
+            <div class="slot-side">
+                <button class="btn" id="slot-auto" type="button">Oto ×10</button>
+                <button class="btn" id="slot-pay" type="button">Ödeme Tablosu</button>
+            </div>
+        </div>
+    </section>
+
     <div id="add-panel" hidden>
         <div class="card" role="dialog" aria-labelledby="add-title">
             <h2 id="add-title">Bakiye Ekle</h2>
@@ -635,6 +1013,20 @@
             </div>
             <div id="add-error"></div>
             <button class="btn" id="add-close" type="button">Kapat</button>
+        </div>
+    </div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <radialGradient id="gGreen" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#8af0a8"/><stop offset="1" stop-color="#1d9a4b"/></radialGradient>
+            <radialGradient id="gRed" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffa3a3"/><stop offset="1" stop-color="#d21f2a"/></radialGradient>
+            <radialGradient id="gGold" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fff3b0"/><stop offset="1" stop-color="#d9a11a"/></radialGradient>
+        </defs>
+    </svg>
+    <div id="pay-panel" hidden>
+        <div class="card" role="dialog" aria-labelledby="pay-title">
+            <h2 id="pay-title">Ödeme Tablosu</h2>
+            <div id="pay-body"></div>
+            <button class="btn" id="pay-close" type="button">Kapat</button>
         </div>
     </div>
     <div id="win-dim"></div>
@@ -1150,9 +1542,12 @@
         function countUp(el, from, to, ms = 1000, delay = 0) {
             const start = performance.now() + delay;
             const stat = el.closest('.stat');
+            const token = Symbol('countUp');
+            el.countToken = token;
             el.textContent = from.toLocaleString('tr-TR');
             if (stat && !delay) { stat.classList.remove('bump'); void stat.offsetWidth; stat.classList.add('bump'); }
             function step(now) {
+                if (el.countToken !== token) return;
                 if (now < start) { requestAnimationFrame(step); return; }
                 const t = Math.min((now - start) / ms, 1);
                 const v = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
@@ -1295,7 +1690,7 @@
 
         function update() {
             $('balance').textContent = balance.toLocaleString('tr-TR');
-            $('total-bet').textContent = totalBet().toLocaleString('tr-TR');
+            $('total-bet').textContent = (view === 'slot' ? SLOT_BETS[slotBetIdx] : totalBet()).toLocaleString('tr-TR');
             renderBets();
             const hasBets = totalBet() > 0;
             $('spin-btn').disabled = spinning || !hasBets;
@@ -1304,11 +1699,12 @@
             $('clear-btn').disabled = spinning || !hasBets;
             $('rebet-btn').disabled = spinning || !Object.keys(lastBets).length;
             $('double-btn').disabled = spinning || !hasBets || totalBet() > balance;
-            $('add-btn').disabled = spinning;
+            $('add-btn').disabled = spinning || slotBusy;
             $('reset-btn').hidden = spinning || balance + totalBet() >= CHIPS[0].value;
             document.querySelectorAll('.chip').forEach(c => {
                 c.disabled = spinning;
             });
+            renderSlot();
         }
 
         function buildChips() {
@@ -1572,6 +1968,7 @@
                 setMessage(`${result} ${colorName} — Kaybettiniz: ${staked.toLocaleString('tr-TR')}`, 'lose');
             }
             $('last-win').textContent = winnings.toLocaleString('tr-TR');
+            lastWinShown.roulette = winnings;
             cellEls['n' + result].classList.add('winner');
 
             spinning = false;
@@ -1777,6 +2174,578 @@
         ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
             $('wheel').addEventListener(type, () => { wheelSwipe = null; }));
 
+        // ---------- Slot: Clover Link ----------
+        // Math (RTP about 94%, simulated over 6 million spins)
+        const SLOT = {
+            SYMBOLS: ['cherry', 'lemon', 'orange', 'apple', 'grape', 'melon', 'bell', 'seven', 'star', 'clover'],
+            WEIGHTS: [24, 22, 16, 12, 8, 6, 4, 2, 4, 9],
+            PAY: {
+                cherry: [12, 35, 110], lemon: [12, 35, 110], orange: [17, 55, 165], apple: [22, 67, 220],
+                grape: [33, 110, 330], melon: [33, 110, 330], bell: [66, 220, 660], seven: [165, 550, 2750]
+            },
+            STAR_PAY: { 3: 1, 4: 4, 5: 50 },
+            LINES: [
+                [1, 1, 1, 1, 1], [0, 0, 0, 0, 0], [2, 2, 2, 2, 2], [0, 1, 2, 1, 0], [2, 1, 0, 1, 2],
+                [0, 0, 1, 0, 0], [2, 2, 1, 2, 2], [1, 0, 0, 0, 1], [1, 2, 2, 2, 1], [0, 1, 1, 1, 0],
+                [2, 1, 1, 1, 2], [1, 0, 1, 0, 1], [1, 2, 1, 2, 1], [0, 1, 0, 1, 0], [2, 1, 2, 1, 2],
+                [1, 1, 0, 1, 1], [1, 1, 2, 1, 1], [0, 0, 2, 0, 0], [2, 2, 0, 2, 2], [0, 2, 2, 2, 0],
+                [2, 0, 0, 0, 2], [1, 0, 2, 0, 1], [1, 2, 0, 2, 1], [0, 2, 0, 2, 0], [2, 0, 2, 0, 2]
+            ],
+            TRIGGER: 5,
+            RESPINS: 3,
+            LAND_CHANCE: 0.06,
+            JACKPOTS: { mini: 20, minor: 100, major: 400, grand: 1000 },
+            P_RED: 0.005,
+            P_GOLD: 0.015,
+            P_JACKPOT: { major: 0.004, minor: 0.012, mini: 0.035 },
+            CREDITS: [0.5, 1, 2, 3, 5, 10],
+            CREDIT_WEIGHTS: [30, 30, 20, 10, 7, 3],
+            GOLD_MULTS: [2, 3, 5],
+            GOLD_WEIGHTS: [60, 30, 10],
+            GOLD_CAP: 10
+        };
+        const SLOT_CLOVER = SLOT.SYMBOLS.indexOf('clover');
+        const SLOT_STAR = SLOT.SYMBOLS.indexOf('star');
+
+        function slotPick(weights, rnd) {
+            let total = 0;
+            for (const w of weights) total += w;
+            let r = rnd() * total;
+            for (let i = 0; i < weights.length; i++) {
+                r -= weights[i];
+                if (r < 0) return i;
+            }
+            return weights.length - 1;
+        }
+
+        function slotSpinGrid(rnd) {
+            return Array.from({ length: 5 }, () => Array.from({ length: 3 }, () => slotPick(SLOT.WEIGHTS, rnd)));
+        }
+
+        function slotEvaluate(grid, bet) {
+            const lineBet = bet / SLOT.LINES.length;
+            const wins = [];
+            let lineTotal = 0;
+            SLOT.LINES.forEach((line, index) => {
+                const first = grid[0][line[0]];
+                if (first === SLOT_CLOVER || first === SLOT_STAR) return;
+                let count = 1;
+                while (count < 5 && grid[count][line[count]] === first) count++;
+                if (count >= 3) {
+                    const amount = SLOT.PAY[SLOT.SYMBOLS[first]][count - 3] * lineBet;
+                    wins.push({ line: index, symbol: first, count, amount });
+                    lineTotal += amount;
+                }
+            });
+            let stars = 0;
+            let clovers = 0;
+            for (const col of grid) for (const s of col) {
+                if (s === SLOT_STAR) stars++;
+                if (s === SLOT_CLOVER) clovers++;
+            }
+            const starWin = stars >= 3 ? SLOT.STAR_PAY[Math.min(stars, 5)] * bet : 0;
+            return { wins, lineTotal, stars, starWin, clovers, total: lineTotal + starWin };
+        }
+
+        function slotRollClover(rnd) {
+            let r = rnd();
+            if (r < SLOT.P_RED) return { kind: 'red' };
+            r -= SLOT.P_RED;
+            if (r < SLOT.P_GOLD) return { kind: 'gold', mult: SLOT.GOLD_MULTS[slotPick(SLOT.GOLD_WEIGHTS, rnd)] };
+            r -= SLOT.P_GOLD;
+            for (const kind of ['major', 'minor', 'mini']) {
+                if (r < SLOT.P_JACKPOT[kind]) return { kind };
+                r -= SLOT.P_JACKPOT[kind];
+            }
+            return { kind: 'credit', mult: SLOT.CREDITS[slotPick(SLOT.CREDIT_WEIGHTS, rnd)] };
+        }
+
+        function slotCloverValue(clover, bet) {
+            if (clover.kind === 'credit') return clover.mult * bet;
+            if (SLOT.JACKPOTS[clover.kind] && clover.kind !== 'grand') return SLOT.JACKPOTS[clover.kind] * bet;
+            return 0;
+        }
+
+        function slotFeatureStart(grid, rnd) {
+            return grid.map(col => col.map(s => (s === SLOT_CLOVER ? slotRollClover(rnd) : null)));
+        }
+
+        function slotRespin(cells, rnd) {
+            const landed = [];
+            cells.forEach((col, r) => col.forEach((cell, row) => {
+                if (!cell && rnd() < SLOT.LAND_CHANCE) {
+                    const clover = slotRollClover(rnd);
+                    cells[r][row] = clover;
+                    landed.push({ r, row, clover });
+                }
+            }));
+            return landed;
+        }
+
+        function slotFeatureTotal(cells, bet) {
+            let sum = 0;
+            let golden = 1;
+            let reds = 0;
+            let filled = 0;
+            for (const col of cells) for (const c of col) {
+                if (!c) continue;
+                filled++;
+                sum += slotCloverValue(c, bet);
+                if (c.kind === 'gold') golden *= c.mult;
+                if (c.kind === 'red') reds++;
+            }
+            golden = Math.min(golden, SLOT.GOLD_CAP);
+            const grand = reds >= 3 || filled === 15 ? SLOT.JACKPOTS.grand * bet : 0;
+            return { sum, golden, grand, filled, total: sum * golden + grand };
+        }
+
+        function slotCountClovers(cells) {
+            let n = 0;
+            for (const col of cells) for (const c of col) if (c) n++;
+            return n;
+        }
+
+
+        const SLOT_BETS = [25, 50, 100, 250, 500, 1000];
+        const SYMBOL_EMOJI = { cherry: '🍒', lemon: '🍋', orange: '🍊', apple: '🍎', grape: '🍇', melon: '🍉', bell: '🔔', star: '⭐' };
+        const CLOVER_FILL = { green: 'gGreen', red: 'gRed', gold: 'gGold' };
+        const CLOVER_EDGE = { green: '#0e5d2c', red: '#7a0c14', gold: '#8a5d05' };
+        const LEAF = 'M0 0C-2-5-9-8-9-13C-9-17-4-18 0-14C4-18 9-17 9-13C9 -8 2-5 0 0Z';
+
+        let view = 'roulette';
+        let slotBusy = false;
+        let slotBetIdx = 1;
+        let slotAuto = 0;
+        let slotGrid = null;
+        const lastWinShown = { roulette: 0, slot: 0 };
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function slotRnd() {
+            try {
+                const a = new Uint32Array(1);
+                crypto.getRandomValues(a);
+                return a[0] / 4294967296;
+            } catch (e) { return Math.random(); }
+        }
+
+        try {
+            const raw = localStorage.getItem('roulette-slot-bet');
+            const savedIdx = raw === null ? -1 : Number(raw);
+            if (Number.isInteger(savedIdx) && savedIdx >= 0 && savedIdx < SLOT_BETS.length) slotBetIdx = savedIdx;
+        } catch (e) { /* storage unavailable */ }
+
+        // ---------- Symbols ----------
+        function cloverSvg(kind = 'green') {
+            const fill = `url(#${CLOVER_FILL[kind]})`;
+            const edge = CLOVER_EDGE[kind];
+            const leaves = [45, 135, 225, 315].map(a => `<path transform="rotate(${a})" d="${LEAF}" fill="${fill}" stroke="${edge}" stroke-width="1"/>`).join('');
+            return `<svg viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(24 24)">${leaves}<circle r="2.2" fill="${edge}"/></g></svg>`;
+        }
+
+        function symEl(idx) {
+            const el = document.createElement('div');
+            el.className = 'sym';
+            const name = SLOT.SYMBOLS[idx];
+            if (name === 'clover') el.innerHTML = cloverSvg('green');
+            else if (name === 'seven') el.innerHTML = '<span class="seven">7</span>';
+            else el.textContent = SYMBOL_EMOJI[name];
+            return el;
+        }
+
+        // ---------- Reels ----------
+        const reelEls = [];
+        let linesSvg = null;
+
+        function buildReels() {
+            const box = $('reels');
+            box.innerHTML = '';
+            slotGrid = slotSpinGrid(slotRnd).map(col => col.map(s => (s === SLOT_CLOVER ? 0 : s)));
+            for (let r = 0; r < 5; r++) {
+                const reel = document.createElement('div');
+                reel.className = 'reel';
+                const strip = document.createElement('div');
+                strip.className = 'strip';
+                slotGrid[r].forEach(s => strip.appendChild(symEl(s)));
+                reel.appendChild(strip);
+                box.appendChild(reel);
+                reelEls.push({ reel, strip });
+            }
+            linesSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            linesSvg.setAttribute('class', 'lines-svg');
+            linesSvg.setAttribute('viewBox', '0 0 5 3');
+            linesSvg.setAttribute('preserveAspectRatio', 'none');
+            box.appendChild(linesSvg);
+        }
+
+        const cellAtReel = (r, row) => reelEls[r].strip.children[row];
+
+        function setStrip(r, symbols) {
+            reelEls[r].strip.replaceChildren(...symbols.map(symEl));
+        }
+
+        function clearWins() {
+            document.querySelectorAll('#reels .sym.win').forEach(el => el.classList.remove('win'));
+            linesSvg.innerHTML = '';
+        }
+
+        function slotMsg(text, cls = '') {
+            const m = $('slot-msg');
+            m.textContent = text;
+            m.className = cls;
+        }
+
+        async function spinReels(grid) {
+            const prev = slotGrid;
+            const cellH = cellAtReel(0, 0).offsetHeight;
+            const quick = reducedMotion();
+            const nearMiss = grid.slice(0, 4).flat().filter(s => s === SLOT_CLOVER).length >= 3;
+            const jobs = [];
+            for (let r = 0; r < 5; r++) {
+                const filler = Array.from({ length: 12 + r * 5 }, () => slotPick(SLOT.WEIGHTS, slotRnd));
+                const items = [...prev[r], ...filler, ...grid[r]];
+                const strip = reelEls[r].strip;
+                strip.style.transition = 'none';
+                strip.style.transform = 'translateY(0)';
+                strip.replaceChildren(...items.map(symEl));
+                void strip.offsetHeight;
+                let dur = quick ? 250 : 800 + r * 320;
+                const anticipate = r === 4 && nearMiss && !quick;
+                if (anticipate) {
+                    dur += 1100;
+                    reelEls[r].reel.classList.add('anticipate');
+                }
+                strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.85, 0.25, 1.05)`;
+                strip.style.transform = `translateY(${-(items.length - 3) * cellH}px)`;
+                jobs.push(sleep(dur).then(() => {
+                    strip.style.transition = 'none';
+                    strip.style.transform = 'none';
+                    setStrip(r, grid[r]);
+                    reelEls[r].reel.classList.remove('anticipate');
+                    tone(150, 0.1, 'sine', 0.22, 70);
+                    tone(800, 0.03, 'square', 0.04, 450);
+                }));
+            }
+            tone(220, 0.6, 'sawtooth', 0.025, 700);
+            await Promise.all(jobs);
+            slotGrid = grid.map(col => col.slice());
+        }
+
+        // ---------- Wins ----------
+        function showLineWins(res) {
+            clearWins();
+            for (const w of res.wins) {
+                const line = SLOT.LINES[w.line];
+                const points = [];
+                for (let r = 0; r < w.count; r++) {
+                    cellAtReel(r, line[r]).classList.add('win');
+                    points.push(`${r + 0.5},${line[r] + 0.5}`);
+                }
+                const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                poly.setAttribute('points', points.join(' '));
+                linesSvg.appendChild(poly);
+            }
+            if (res.starWin) {
+                slotGrid.forEach((col, r) => col.forEach((s, row) => {
+                    if (s === SLOT_STAR) cellAtReel(r, row).classList.add('win');
+                }));
+            }
+        }
+
+        function credit(amount) {
+            const before = balance;
+            balance += amount;
+            saveState();
+            update();
+            countUp($('balance'), before, balance, 700);
+        }
+
+        function celebrate(amount, bet, big) {
+            const ratio = amount / bet;
+            credit(amount);
+            coinsToBalance(Math.min(40, Math.round(6 + ratio * 2)), $('reels'), $('balance'));
+            if (big) {
+                showWin(amount, ratio);
+                confetti(Math.min(320, Math.round(90 + ratio * 6)), $('reels'));
+            }
+            sfx.win(ratio >= 10);
+            vibrate(ratio >= 10 ? [60, 40, 60, 40, 120] : [30, 20, 30]);
+        }
+
+        // ---------- Clover Link feature ----------
+        function cloverLabel(c, bet) {
+            if (c.kind === 'credit') return formatAmount(c.mult * bet);
+            if (c.kind === 'gold') return '×' + c.mult;
+            if (c.kind === 'red') return 'GRAND';
+            return c.kind.toUpperCase();
+        }
+
+        function setCloverCell(r, row, clover, bet, pop) {
+            const el = cellAtReel(r, row);
+            const color = clover.kind === 'red' ? 'red' : clover.kind === 'gold' ? 'gold' : 'green';
+            const extra = clover.kind === 'red' ? ' red-clover' : clover.kind === 'gold' ? ' gold-clover' : clover.kind === 'credit' ? '' : ' jackpot-clover';
+            el.className = 'sym clover-cell' + extra + (pop ? ' pop' : '');
+            el.innerHTML = `${cloverSvg(color)}<span class="val">${cloverLabel(clover, bet)}</span>`;
+        }
+
+        function renderFeature(cells, bet) {
+            cells.forEach((col, r) => col.forEach((c, row) => {
+                if (c) {
+                    setCloverCell(r, row, c, bet, false);
+                } else {
+                    const el = cellAtReel(r, row);
+                    el.className = 'sym empty';
+                    el.innerHTML = '';
+                }
+            }));
+        }
+
+        function updateHud(left, cells) {
+            $('hud-respins').textContent = `RESPIN ${left}`;
+            $('hud-total').textContent = `YONCA ${slotCountClovers(cells)}/15`;
+        }
+
+        async function banner(text, ms) {
+            const b = $('slot-banner');
+            b.textContent = text;
+            b.hidden = false;
+            b.style.animation = 'none';
+            void b.offsetWidth;
+            b.style.animation = '';
+            await sleep(ms);
+            b.hidden = true;
+        }
+
+        async function runFeature(grid, bet) {
+            const cells = slotFeatureStart(grid, slotRnd);
+            $('reels').classList.add('feature');
+            [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, f, i * 0.1));
+            await banner('CLOVER LINK', 1500);
+            renderFeature(cells, bet);
+            $('feature-hud').hidden = false;
+            let left = SLOT.RESPINS;
+            updateHud(left, cells);
+
+            while (left > 0 && slotCountClovers(cells) < 15) {
+                await sleep(500);
+                document.querySelectorAll('#reels .sym.empty').forEach(el => el.classList.add('rolling'));
+                const landed = slotRespin(cells, slotRnd);
+                for (let i = 0; i < 4; i++) { tone(700 + i * 60, 0.05, 'triangle', 0.05, 500, i * 0.2); }
+                await sleep(reducedMotion() ? 300 : 900);
+                document.querySelectorAll('#reels .sym.rolling').forEach(el => el.classList.remove('rolling'));
+                for (const { r, row, clover } of landed) {
+                    setCloverCell(r, row, clover, bet, true);
+                    tone(900 + Math.random() * 300, 0.12, 'triangle', 0.12, 1500);
+                }
+                vibrate(landed.length ? 20 : 0);
+                left = landed.length ? SLOT.RESPINS : left - 1;
+                updateHud(left, cells);
+            }
+
+            await sleep(500);
+            let running = 0;
+            let step = 0;
+            for (let r = 0; r < 5; r++) {
+                for (let row = 0; row < 3; row++) {
+                    const c = cells[r][row];
+                    if (!c) continue;
+                    const el = cellAtReel(r, row);
+                    el.classList.add('collect');
+                    running += slotCloverValue(c, bet);
+                    $('hud-total').textContent = 'TOPLAM ' + Math.round(running).toLocaleString('tr-TR');
+                    tone(500 + step * 45, 0.08, 'triangle', 0.1, 700 + step * 45);
+                    step++;
+                    await sleep(reducedMotion() ? 40 : 170);
+                    el.classList.remove('collect');
+                }
+            }
+            const result = slotFeatureTotal(cells, bet);
+            if (result.golden > 1) {
+                await banner('ALTIN ×' + result.golden, 1300);
+                $('hud-total').textContent = 'TOPLAM ' + Math.round(result.sum * result.golden).toLocaleString('tr-TR');
+            }
+            if (result.grand) {
+                await banner('GRAND JACKPOT', 1600);
+                $('hud-total').textContent = 'TOPLAM ' + Math.round(result.total).toLocaleString('tr-TR');
+            }
+            await sleep(600);
+
+            $('feature-hud').hidden = true;
+            $('reels').classList.remove('feature');
+            grid.forEach((col, r) => setStrip(r, col));
+            slotGrid = grid.map(col => col.slice());
+            return result.total;
+        }
+
+        // ---------- Spin flow ----------
+        async function slotSpin() {
+            if (slotBusy || spinning) return;
+            const bet = SLOT_BETS[slotBetIdx];
+            if (balance < bet) {
+                slotMsg('Yetersiz bakiye', 'lose');
+                slotAuto = 0;
+                renderSlot();
+                checkBroke();
+                return;
+            }
+            slotBusy = true;
+            balance -= bet;
+            saveState();
+            clearWins();
+            slotMsg('');
+            update();
+            ensureAudio();
+
+            const grid = slotSpinGrid(slotRnd);
+            await spinReels(grid);
+            const res = slotEvaluate(grid, bet);
+            showLineWins(res);
+            let won = 0;
+
+            if (res.total > 0) {
+                won += res.total;
+                const ratio = res.total / bet;
+                const parts = [];
+                if (res.wins.length) parts.push(`${res.wins.length} hat`);
+                if (res.starWin) parts.push('yıldız');
+                slotMsg(`+${Math.round(res.total).toLocaleString('tr-TR')} (${parts.join(' + ')})`, 'win');
+                celebrate(res.total, bet, ratio >= 5);
+                await sleep(res.clovers >= SLOT.TRIGGER ? 1800 : ratio >= 5 ? 1200 : 700);
+            } else if (res.clovers < SLOT.TRIGGER) {
+                slotMsg('Kazanç yok', '');
+            }
+
+            if (res.clovers >= SLOT.TRIGGER) {
+                clearWins();
+                const bonus = await runFeature(grid, bet);
+                won += bonus;
+                if (bonus > 0) {
+                    slotMsg(`Clover Link: +${Math.round(bonus).toLocaleString('tr-TR')}`, 'win');
+                    celebrate(bonus, bet, true);
+                    await sleep(2200);
+                }
+            }
+
+            lastWinShown.slot = Math.round(won);
+            $('last-win').textContent = lastWinShown.slot.toLocaleString('tr-TR');
+            slotBusy = false;
+            update();
+
+            if (slotAuto > 0) {
+                slotAuto--;
+                renderSlot();
+                if (slotAuto > 0) setTimeout(slotSpin, won > 0 ? 900 : 300);
+            }
+        }
+
+        // ---------- Controls ----------
+        function renderSlot() {
+            const bet = SLOT_BETS[slotBetIdx];
+            $('bet-value').textContent = bet.toLocaleString('tr-TR');
+            $('bet-down').disabled = slotBusy || slotBetIdx === 0;
+            $('bet-up').disabled = slotBusy || slotBetIdx === SLOT_BETS.length - 1;
+            $('slot-spin').disabled = slotBusy || spinning;
+            $('slot-auto').classList.toggle('active', slotAuto > 0);
+            $('slot-auto').textContent = slotAuto > 0 ? `Dur (${slotAuto})` : 'Oto ×10';
+            $('slot-pay').disabled = slotBusy;
+            $('tab-roulette').disabled = slotBusy || spinning;
+            $('tab-slot').disabled = slotBusy || spinning;
+            const jp = $('jackpots');
+            if (!jp.children.length) {
+                ['mini', 'minor', 'major', 'grand'].forEach(k => {
+                    const d = document.createElement('div');
+                    d.className = 'jp' + (k === 'grand' ? ' grand' : '');
+                    d.innerHTML = `<span>${k.toUpperCase()}</span><strong id="jp-${k}">0</strong>`;
+                    jp.appendChild(d);
+                });
+            }
+            for (const k of ['mini', 'minor', 'major', 'grand']) {
+                $('jp-' + k).textContent = formatAmount(SLOT.JACKPOTS[k] * bet);
+            }
+        }
+
+        function setBet(delta) {
+            if (slotBusy) return;
+            slotBetIdx = Math.min(SLOT_BETS.length - 1, Math.max(0, slotBetIdx + delta));
+            try { localStorage.setItem('roulette-slot-bet', String(slotBetIdx)); } catch (e) { /* storage unavailable */ }
+            update();
+        }
+
+        function setView(next) {
+            if (spinning || slotBusy || next === view) return;
+            view = next;
+            $('roulette-view').hidden = next !== 'roulette';
+            $('slot-view').hidden = next !== 'slot';
+            $('tab-roulette').classList.toggle('active', next === 'roulette');
+            $('tab-slot').classList.toggle('active', next === 'slot');
+            $('tab-roulette').setAttribute('aria-selected', String(next === 'roulette'));
+            $('tab-slot').setAttribute('aria-selected', String(next === 'slot'));
+            $('game-title').textContent = next === 'slot' ? 'Clover Link' : 'Rulet';
+            $('last-win').countToken = null;
+            $('last-win').textContent = lastWinShown[next].toLocaleString('tr-TR');
+            setEraser(false);
+            slotAuto = 0;
+            update();
+            if (next === 'roulette') buildBoard();
+            try { localStorage.setItem('roulette-view', next); } catch (e) { /* storage unavailable */ }
+        }
+
+        function openPay() {
+            const bet = SLOT_BETS[slotBetIdx];
+            const lineBet = bet / SLOT.LINES.length;
+            const rows = ['seven', 'bell', 'melon', 'grape', 'apple', 'orange', 'lemon', 'cherry'].map(name => {
+                const icon = name === 'seven' ? '<span style="color:#ff5a5a;font-weight:900">7</span>' : SYMBOL_EMOJI[name];
+                const [a, b, c] = SLOT.PAY[name].map(m => formatAmount(m * lineBet));
+                return `<tr><td><span class="ico">${icon}</span></td><td>${a}</td><td>${b}</td><td>${c}</td></tr>`;
+            }).join('');
+            $('pay-body').innerHTML = `
+                <table class="pay-table">
+                    <tr><th>HAT BAŞINA</th><th>3</th><th>4</th><th>5</th></tr>
+                    ${rows}
+                    <tr><td><span class="ico">${SYMBOL_EMOJI.star}</span> Yıldız</td><td>${formatAmount(SLOT.STAR_PAY[3] * bet)}</td><td>${formatAmount(SLOT.STAR_PAY[4] * bet)}</td><td>${formatAmount(SLOT.STAR_PAY[5] * bet)}</td></tr>
+                </table>
+                <ul>
+                    <li>25 sabit hat. Soldan sağa, en az 3 aynı sembol kazanır.</li>
+                    <li>Yıldız hatta bakmaz, ekranın herhangi bir yerinde 3, 4 veya 5 adet toplam bahsi katlar.</li>
+                    <li>Ekranda 5 veya daha fazla yonca Clover Link bonusunu açar. Yoncalar yerinde kalır, 3 respin verilir, her yeni yonca respinleri 3'e yeniler.</li>
+                    <li>Yonca değerleri bahsin katıdır. MINI ${SLOT.JACKPOTS.mini}×, MINOR ${SLOT.JACKPOTS.minor}×, MAJOR ${SLOT.JACKPOTS.major}×.</li>
+                    <li>3 kırmızı yonca veya dolu ekran GRAND ${SLOT.JACKPOTS.grand}× kazandırır.</li>
+                    <li>Altın yonca bonus toplamını ×2, ×3 veya ×5 katlar (en çok ×${SLOT.GOLD_CAP}).</li>
+                    <li>Oyun parasıyla oynanır, teorik geri ödeme yaklaşık %94.</li>
+                </ul>`;
+            $('pay-panel').hidden = false;
+        }
+
+        $('tab-roulette').addEventListener('click', () => setView('roulette'));
+        $('tab-slot').addEventListener('click', () => setView('slot'));
+        $('bet-down').addEventListener('click', () => setBet(-1));
+        $('bet-up').addEventListener('click', () => setBet(1));
+        $('slot-spin').addEventListener('click', slotSpin);
+        $('slot-auto').addEventListener('click', () => {
+            if (slotAuto > 0) { slotAuto = 0; renderSlot(); return; }
+            slotAuto = 10;
+            renderSlot();
+            slotSpin();
+        });
+        $('slot-pay').addEventListener('click', openPay);
+        $('pay-close').addEventListener('click', () => { $('pay-panel').hidden = true; });
+        $('pay-panel').addEventListener('click', e => { if (e.target === $('pay-panel')) $('pay-panel').hidden = true; });
+
+        // Swiping across the reels spins them
+        let reelSwipe = null;
+        $('reels').addEventListener('pointerdown', e => { if (e.button === 0) reelSwipe = { x: e.clientX, y: e.clientY }; });
+        $('reels').addEventListener('pointermove', e => {
+            if (!reelSwipe) return;
+            if (Math.hypot(e.clientX - reelSwipe.x, e.clientY - reelSwipe.y) >= 50) {
+                reelSwipe = null;
+                slotSpin();
+            }
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
+            $('reels').addEventListener(type, () => { reelSwipe = null; }));
+
+        buildReels();
+
         // ---------- Init ----------
         window.matchMedia('(max-width: 800px)').addEventListener('change', buildBoard);
         window.addEventListener('resize', renderBets);
@@ -1788,12 +2757,13 @@
         drawWheel();
         requestAnimationFrame(idle);
         setTimeout(checkBroke, 400);
+        try { if (localStorage.getItem('roulette-view') === 'slot') setView('slot'); } catch (e) { /* storage unavailable */ }
 
         const MAX_ADD = 1000000;
         const closeAdd = () => { $('add-panel').hidden = true; };
 
         function addBalance(amount) {
-            if (spinning) return;
+            if (spinning || slotBusy) return;
             if (!Number.isInteger(amount) || amount < 1 || amount > MAX_ADD) {
                 $('add-error').textContent = `1 ile ${MAX_ADD.toLocaleString('tr-TR')} arasında tam sayı girin`;
                 return;
@@ -1825,7 +2795,8 @@
 
         // Offer to top up when the player cannot place even the smallest chip
         function checkBroke() {
-            if (!spinning && totalBet() === 0 && balance < CHIPS[0].value && $('add-panel').hidden) openAdd(true);
+            const minBet = view === 'slot' ? SLOT_BETS[0] : CHIPS[0].value;
+            if (!spinning && !slotBusy && (view === 'slot' || totalBet() === 0) && balance < minBet && $('add-panel').hidden) openAdd(true);
         }
 
         $('add-btn').addEventListener('click', () => openAdd());
@@ -1854,9 +2825,9 @@
             update();
         });
         document.addEventListener('keydown', e => {
-            if (e.code === 'Space' && !$('add-panel').hidden) return;
-            if (e.code === 'Space') { e.preventDefault(); spin(); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+            if (e.code === 'Space' && (!$('add-panel').hidden || !$('pay-panel').hidden)) return;
+            if (e.code === 'Space') { e.preventDefault(); if (view === 'slot') slotSpin(); else spin(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && view === 'roulette') { e.preventDefault(); undo(); }
         });
     </script>
 </body>
