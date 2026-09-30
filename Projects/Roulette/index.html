@@ -272,6 +272,55 @@
             animation: floatUp 1.6s ease-out forwards;
         }
 
+        @keyframes winIn {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            55% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        #win-overlay {
+            position: fixed;
+            left: 50%;
+            top: 42%;
+            z-index: 15;
+            text-align: center;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: winIn 0.55s ease-out both;
+            transition: opacity 0.5s;
+        }
+
+        #win-overlay.out { opacity: 0; }
+
+        #win-overlay .wo-label {
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        }
+
+        #win-overlay .wo-amount {
+            font-size: clamp(3rem, 14vw, 6rem);
+            font-weight: 900;
+            line-height: 1.05;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(90deg, #b8860b, #ffe27a, #fff6c8, #ffe27a, #b8860b);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 24px rgba(226, 182, 70, 0.8));
+            animation: shine 1.4s linear infinite;
+        }
+
+        #win-overlay.big .wo-label { color: #ffe27a; letter-spacing: 10px; }
+
         #fx {
             position: fixed;
             inset: 0;
@@ -439,6 +488,7 @@
         </section>
     </main>
 
+    <div id="win-overlay" hidden><div class="wo-label"></div><div class="wo-amount"></div></div>
     <canvas id="fx"></canvas>
 
     <script>
@@ -738,11 +788,82 @@
                     color: colors[i % colors.length], life: 1
                 });
             }
+            startFx();
+        }
+
+        let coins = [];
+        let lastClink = 0;
+
+        function startFx() {
             if (!fxRunning) { fxRunning = true; requestAnimationFrame(stepFx); }
         }
 
-        function stepFx() {
+        // Gold coins fly from the wheel to the balance box
+        function coinsToBalance(count, fromEl, toEl) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const f = fromEl.getBoundingClientRect();
+            const t = toEl.getBoundingClientRect();
+            const now = performance.now();
+            const x1 = t.left + t.width / 2;
+            const y1 = t.top + t.height / 2;
+            for (let i = 0; i < count; i++) {
+                const x0 = f.left + f.width / 2 + (Math.random() - 0.5) * f.width * 0.5;
+                const y0 = f.top + f.height / 2 + (Math.random() - 0.5) * f.height * 0.5;
+                coins.push({
+                    x0, y0, x1, y1,
+                    cx: (x0 + x1) / 2 + (Math.random() - 0.5) * 260,
+                    cy: Math.min(y0, y1) - 60 - Math.random() * 140,
+                    start: now + 350 + i * 40,
+                    dur: 900 + Math.random() * 300,
+                    spin: 8 + Math.random() * 8
+                });
+            }
+            startFx();
+        }
+
+        function drawCoin(x, y, squash) {
+            const r = 10;
+            fxCtx.save();
+            fxCtx.translate(x, y);
+            fxCtx.scale(Math.max(squash, 0.15), 1);
+            const g = fxCtx.createRadialGradient(-3, -3, 1, 0, 0, r);
+            g.addColorStop(0, '#fff3b0');
+            g.addColorStop(0.6, '#e2b646');
+            g.addColorStop(1, '#a87a10');
+            fxCtx.beginPath();
+            fxCtx.arc(0, 0, r, 0, Math.PI * 2);
+            fxCtx.fillStyle = g;
+            fxCtx.shadowColor = 'rgba(226, 182, 70, 0.9)';
+            fxCtx.shadowBlur = 8;
+            fxCtx.fill();
+            fxCtx.shadowBlur = 0;
+            fxCtx.beginPath();
+            fxCtx.arc(0, 0, r * 0.62, 0, Math.PI * 2);
+            fxCtx.strokeStyle = 'rgba(122, 82, 8, 0.7)';
+            fxCtx.lineWidth = 1.5;
+            fxCtx.stroke();
+            fxCtx.restore();
+        }
+
+        function stepFx(now) {
             fxCtx.clearRect(0, 0, fx.width, fx.height);
+            coins = coins.filter(c => {
+                const u = (now - c.start) / c.dur;
+                if (u < 0) return true;
+                if (u >= 1) {
+                    if (now - lastClink > 45) { lastClink = now; tone(1500 + Math.random() * 500, 0.07, 'triangle', 0.05, 2200); }
+                    const stat = $('balance').closest('.stat');
+                    stat.classList.remove('bump');
+                    void stat.offsetWidth;
+                    stat.classList.add('bump');
+                    return false;
+                }
+                const e = u * u * (3 - 2 * u);
+                const x = (1 - e) * (1 - e) * c.x0 + 2 * (1 - e) * e * c.cx + e * e * c.x1;
+                const y = (1 - e) * (1 - e) * c.y0 + 2 * (1 - e) * e * c.cy + e * e * c.y1;
+                drawCoin(x, y, Math.abs(Math.cos(u * c.spin)));
+                return true;
+            });
             particles = particles.filter(p => p.life > 0 && p.y < fx.height + 20);
             for (const p of particles) {
                 p.vy += 0.3;
@@ -759,7 +880,7 @@
                 fxCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
                 fxCtx.restore();
             }
-            if (particles.length) {
+            if (particles.length || coins.length) {
                 requestAnimationFrame(stepFx);
             } else {
                 fxRunning = false;
@@ -778,11 +899,35 @@
             setTimeout(() => el.remove(), 1700);
         }
 
-        function countUp(el, from, to, ms = 1000) {
-            const start = performance.now();
+        let winTimer = null;
+
+        function showWin(amount, ratio) {
+            const box = $('win-overlay');
+            const tier = ratio >= 30 ? ['MEGA KAZANÇ', true] : ratio >= 10 ? ['BÜYÜK KAZANÇ', true] : ['KAZANDINIZ', false];
+            box.querySelector('.wo-label').textContent = tier[0];
+            box.classList.toggle('big', tier[1]);
+            box.classList.remove('out');
+            box.hidden = false;
+            box.style.animation = 'none';
+            void box.offsetWidth;
+            box.style.animation = '';
+            const amountEl = box.querySelector('.wo-amount');
+            countUp(amountEl, 0, amount, 1100);
+            amountEl.textContent = '0';
+            clearTimeout(winTimer);
+            winTimer = setTimeout(() => {
+                box.classList.add('out');
+                winTimer = setTimeout(() => { box.hidden = true; }, 500);
+            }, 2600);
+        }
+
+        function countUp(el, from, to, ms = 1000, delay = 0) {
+            const start = performance.now() + delay;
             const stat = el.closest('.stat');
-            if (stat) { stat.classList.remove('bump'); void stat.offsetWidth; stat.classList.add('bump'); }
+            el.textContent = from.toLocaleString('tr-TR');
+            if (stat && !delay) { stat.classList.remove('bump'); void stat.offsetWidth; stat.classList.add('bump'); }
             function step(now) {
+                if (now < start) { requestAnimationFrame(step); return; }
                 const t = Math.min((now - start) / ms, 1);
                 const v = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
                 el.textContent = v.toLocaleString('tr-TR');
@@ -1182,9 +1327,10 @@
             if (winnings > 0) {
                 const ratio = winnings / staked;
                 const big = ratio >= 10;
-                countUp($('balance'), balanceBefore, balance);
-                countUp($('last-win'), 0, winnings);
-                floatText('+' + winnings.toLocaleString('tr-TR'), $('message'));
+                countUp($('balance'), balanceBefore, balance, 900, 900);
+                countUp($('last-win'), 0, winnings, 900, 900);
+                showWin(winnings, ratio);
+                coinsToBalance(Math.min(30, Math.round(8 + ratio * 2)), $('wheel'), $('balance'));
                 confetti(Math.min(220, Math.round(50 + ratio * 12)), $('wheel'));
                 sfx.win(big);
                 vibrate(big ? [60, 40, 60, 40, 120] : [40, 30, 40]);
