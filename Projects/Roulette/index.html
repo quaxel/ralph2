@@ -885,104 +885,8 @@
             osc.stop(t0 + dur + 0.02);
         }
 
-        // Short wooden click: a filtered noise burst plus a low body tone
-        let noiseBuf = null;
-        function noiseBuffer(ac) {
-            if (!noiseBuf) {
-                noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
-                const d = noiseBuf.getChannelData(0);
-                for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-            }
-            return noiseBuf;
-        }
-
-        function click(vol = 0.12, freq = 3000, delay = 0) {
-            const ac = ensureAudio();
-            if (!ac) return;
-            const t0 = ac.currentTime + delay;
-            const src = ac.createBufferSource();
-            src.buffer = noiseBuffer(ac);
-            const bp = ac.createBiquadFilter();
-            bp.type = 'bandpass';
-            bp.frequency.value = freq * (0.9 + Math.random() * 0.2);
-            bp.Q.value = 6;
-            const g = ac.createGain();
-            g.gain.setValueAtTime(vol, t0);
-            g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04);
-            src.connect(bp).connect(g).connect(ac.destination);
-            src.start(t0, Math.random());
-            src.stop(t0 + 0.05);
-            tone(520 * (0.9 + Math.random() * 0.2), 0.035, 'sine', vol * 0.8, 260, delay);
-        }
-
-        // Wheel whirr and ball rolling on the rim, both fading with the spin
-        let spinNodes = null;
-        function startSpinLoop(seconds) {
-            const ac = ensureAudio();
-            if (!ac) return;
-            stopSpinLoop(0.05);
-            const t0 = ac.currentTime;
-            const master = ac.createGain();
-            const limiter = ac.createDynamicsCompressor();
-            limiter.threshold.value = -14;
-            limiter.ratio.value = 12;
-            master.connect(limiter).connect(ac.destination);
-            const layer = (freq, q) => {
-                const src = ac.createBufferSource();
-                src.buffer = noiseBuffer(ac);
-                src.loop = true;
-                const filter = ac.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.value = freq;
-                filter.Q.value = q;
-                const gain = ac.createGain();
-                gain.gain.value = 0;
-                src.connect(filter).connect(gain).connect(master);
-                src.start(t0);
-                return { src, filter, gain };
-            };
-            const wheel = layer(900, 0.9);
-            wheel.gain.gain.setValueAtTime(0, t0);
-            wheel.gain.gain.linearRampToValueAtTime(0.3, t0 + 0.25);
-            wheel.gain.gain.linearRampToValueAtTime(0.16, t0 + seconds * 0.6);
-            wheel.gain.gain.linearRampToValueAtTime(0, t0 + seconds);
-            wheel.filter.frequency.exponentialRampToValueAtTime(350, t0 + seconds);
-
-            const ball = layer(2200, 0.8);
-            ball.gain.gain.setValueAtTime(0, t0);
-            ball.gain.gain.linearRampToValueAtTime(0.32, t0 + 0.3);
-            ball.gain.gain.linearRampToValueAtTime(0.24, t0 + seconds * 0.5);
-            ball.gain.gain.linearRampToValueAtTime(0, t0 + seconds * 0.62);
-            ball.filter.frequency.exponentialRampToValueAtTime(900, t0 + seconds * 0.6);
-            const lfo = ac.createOscillator();
-            const depth = ac.createGain();
-            depth.gain.value = 0.13;
-            lfo.frequency.setValueAtTime(14, t0);
-            lfo.frequency.exponentialRampToValueAtTime(3, t0 + seconds * 0.6);
-            lfo.connect(depth).connect(ball.gain.gain);
-            lfo.start(t0);
-
-            spinNodes = { master, sources: [wheel.src, ball.src, lfo] };
-        }
-
-        function stopSpinLoop(fade = 0.25) {
-            if (!spinNodes || !audioCtx) return;
-            const { master, sources } = spinNodes;
-            spinNodes = null;
-            const now = audioCtx.currentTime;
-            try {
-                master.gain.cancelScheduledValues(now);
-                master.gain.setValueAtTime(master.gain.value, now);
-                master.gain.linearRampToValueAtTime(0, now + fade);
-                sources.forEach(src => src.stop(now + fade + 0.05));
-            } catch (e) { /* already stopped */ }
-        }
-
         const sfx = {
             chip: () => { tone(900, 0.06, 'square', 0.08, 450); tone(1400, 0.04, 'triangle', 0.06, 900, 0.02); },
-            tick: t => { if (t > 0.5) click(0.3 * (1 - t * 0.3), 2800); },
-            drop: () => { click(0.4, 2000); tone(260, 0.12, 'sine', 0.25, 120); },
-            settle: () => { click(0.4, 2400); click(0.3, 2600, 0.1); click(0.2, 3000, 0.19); tone(200, 0.15, 'sine', 0.22, 100); },
             win: big => {
                 [523, 659, 784, 1047, ...(big ? [1319, 1568, 2093] : [])].forEach((f, i) => tone(f, 0.22, 'triangle', 0.14, f, i * 0.09));
                 if (big) {
@@ -1548,7 +1452,7 @@
                 return;
             }
             spinning = true;
-            startSpinLoop(SPIN_DURATION / 1000);
+            ensureAudio();
             $('badge').hidden = true;
             restingPocket = -1;
             document.querySelectorAll('.cell.winner').forEach(el => el.classList.remove('winner'));
@@ -1567,7 +1471,6 @@
             while (b0 - bEnd < minTravel) bEnd -= Math.PI * 2;
 
             ballVisible = true;
-            let lastTick = Math.floor(b0 / SEG);
             let dropped = false;
             const start = performance.now();
 
@@ -1581,9 +1484,7 @@
                 const bounce = dropT > 0 && dropT < 1 ? Math.abs(Math.sin(dropT * Math.PI * 3)) * (1 - dropT) * W * 0.02 : 0;
                 ballRadius = R_TRACK - W * 0.02 - (R_TRACK - W * 0.02 - R_BALL_REST) * easeOutCubic(dropT) + bounce;
 
-                const tickIdx = Math.floor(ballAngle / SEG);
-                if (tickIdx !== lastTick && t < 0.92) { lastTick = tickIdx; sfx.tick(t); }
-                if (!dropped && dropT > 0.5) { dropped = true; sfx.drop(); vibrate(15); }
+                if (!dropped && dropT > 0.5) { dropped = true; vibrate(15); }
 
                 drawWheel();
                 if (t < 1) {
@@ -1597,8 +1498,6 @@
         }
 
         function finishSpin(result) {
-            stopSpinLoop(0.3);
-            sfx.settle();
             let winnings = 0;
             for (const [key, amount] of Object.entries(bets)) {
                 if (BET_TYPES[key].wins(result)) winnings += amount * (BET_TYPES[key].payout + 1);
@@ -1643,10 +1542,10 @@
                 coinsToBalance(Math.min(40, Math.round(12 + ratio * 2)), $('wheel'), $('balance'));
                 confetti(Math.min(320, Math.round(90 + ratio * 14)), $('wheel'));
                 if (big) setTimeout(() => confetti(120, $('balance')), 700);
-                setTimeout(() => sfx.win(big), 350);
+                sfx.win(big);
                 vibrate(big ? [60, 40, 60, 40, 120] : [40, 30, 40]);
             } else {
-                setTimeout(() => sfx.lose(), 350);
+                sfx.lose();
                 vibrate(120);
             }
             setTimeout(checkBroke, winnings > 0 ? 4500 : 1500);
@@ -1828,7 +1727,6 @@
         $('mute-btn').textContent = muted ? 'Ses: Kapalı' : 'Ses: Açık';
         $('mute-btn').addEventListener('click', () => {
             muted = !muted;
-            if (muted) stopSpinLoop(0.05);
             try { localStorage.setItem('roulette-muted', muted ? '1' : '0'); } catch (e) { /* storage unavailable */ }
             $('mute-btn').textContent = muted ? 'Ses: Kapalı' : 'Ses: Açık';
             if (!muted) sfx.chip();
