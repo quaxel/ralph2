@@ -772,11 +772,24 @@
             update();
         }
 
+        // Removing takes off the selected chip; a bet that would fall below its minimum is removed entirely
+        function shrinkBet(key, amount) {
+            const remaining = bets[key] - amount;
+            if (remaining < minBetFor(key)) {
+                balance += bets[key];
+                delete bets[key];
+                actionStack = actionStack.filter(a => a.key !== key);
+            } else {
+                balance += amount;
+                bets[key] = remaining;
+                actionStack = actionStack.filter(a => a.key !== key);
+                actionStack.push({ key, amount: remaining });
+            }
+        }
+
         function removeBet(key) {
             if (spinning || !bets[key]) return;
-            balance += bets[key];
-            delete bets[key];
-            actionStack = actionStack.filter(a => a.key !== key);
+            shrinkBet(key, selectedChip);
             update();
         }
 
@@ -786,7 +799,13 @@
             if (!last) return;
             balance += last.amount;
             bets[last.key] -= last.amount;
-            if (bets[last.key] <= 0) delete bets[last.key];
+            if (bets[last.key] <= 0) {
+                delete bets[last.key];
+            } else if (bets[last.key] < minBetFor(last.key)) {
+                balance += bets[last.key];
+                delete bets[last.key];
+                actionStack = actionStack.filter(a => a.key !== last.key);
+            }
             update();
         }
 
