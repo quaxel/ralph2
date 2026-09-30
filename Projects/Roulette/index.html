@@ -1615,13 +1615,13 @@
             return null;
         }
 
-        function resolveTarget(cell, x, y, dir) {
+        function resolveTarget(cell, x, y, dir, Z = 0.25) {
             const n = numOf(cell);
             if (n === null || n === 0) return cell.dataset.key;
             const r = cell.getBoundingClientRect();
             const dx = (x - r.left) / r.width;
             const dy = (y - r.top) / r.height;
-            const Z = 0.25, OFF = 6;
+            const OFF = 6;
             let sx = dx < Z ? -1 : dx > 1 - Z ? 1 : 0;
             let sy = dy < Z ? -1 : dy > 1 - Z ? 1 : 0;
             // While swiping through a cell's middle, crossing its side edge is not a split
@@ -1652,21 +1652,30 @@
 
         // Press or swipe across the board to place one chip on each cell touched
         let swipeVisited = null;
-        let swipeLast = null;
+        let swipePrev = null;
         let swipeDir = { x: 1, y: 0 };
+        const SWIPE_EDGE = 0.36;
 
-        function swipePlace(x, y) {
-            const dist = Math.hypot(x - swipeLast.x, y - swipeLast.y);
-            if (dist >= 4) {
-                swipeDir = { x: x - swipeLast.x, y: y - swipeLast.y };
-                swipeLast = { x, y };
-            }
+        function swipeAt(x, y) {
             const cell = cellAt(x, y);
             if (!cell) return;
-            const key = resolveTarget(cell, x, y, swipeDir);
+            const key = resolveTarget(cell, x, y, swipeDir, SWIPE_EDGE);
             if (swipeVisited.has(key)) return;
             swipeVisited.add(key);
             placeBet(key);
+        }
+
+        // Walk along the finger path in small steps so fast swipes do not skip edge zones
+        function swipePlace(x, y) {
+            const from = swipePrev;
+            const dx = x - from.x;
+            const dy = y - from.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 1) return;
+            if (dist >= 3) swipeDir = { x: dx, y: dy };
+            swipePrev = { x, y };
+            const steps = Math.ceil(dist / 3);
+            for (let i = 1; i <= steps; i++) swipeAt(from.x + dx * i / steps, from.y + dy * i / steps);
         }
 
         board.addEventListener('pointerdown', e => {
@@ -1675,7 +1684,7 @@
             if (!cell) return;
             const key = resolveTarget(cell, e.clientX, e.clientY);
             swipeVisited = new Set([key]);
-            swipeLast = { x: e.clientX, y: e.clientY };
+            swipePrev = { x: e.clientX, y: e.clientY };
             placeBet(key);
         });
         board.addEventListener('pointermove', e => {
