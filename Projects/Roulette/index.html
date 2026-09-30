@@ -489,6 +489,13 @@
         .reels.feature .reel { background: #0b1f16; }
         .reel.anticipate { box-shadow: 0 0 0 3px var(--gold), 0 0 22px rgba(226, 182, 70, 0.95); z-index: 1; }
 
+        .reel.spinning .strip { filter: blur(1.6px); }
+        .reel.thud .strip { animation: thud 0.16s ease-out; }
+
+        @keyframes thud {
+            40% { transform: translateY(5px); }
+        }
+
         .strip {
             display: flex;
             flex-direction: column;
@@ -2602,6 +2609,7 @@
         }
 
 
+        const SLOT_SPEED = 46; // symbols per second while spinning
         const SLOT_BETS = [25, 50, 100, 250, 500, 1000];
         const SYMBOL_EMOJI = { cherry: '🍒', lemon: '🍋', orange: '🍊', apple: '🍎', grape: '🍇', melon: '🍉', bell: '🔔', star: '⭐' };
         const CLOVER_FILL = { green: 'gGreen', red: 'gRed', gold: 'gGold' };
@@ -2703,7 +2711,15 @@
             let cloversSeen = 0;
             $('clover-count').hidden = true;
             for (let r = 0; r < 5; r++) {
-                const filler = Array.from({ length: 12 + r * 5 }, () => slotPick(SLOT.WEIGHTS, slotRnd));
+                // Constant fast speed, each reel stops abruptly one after another
+                let dur = quick ? 250 : 650 + r * 260;
+                const anticipate = r === 4 && nearMiss && !quick;
+                if (anticipate) {
+                    dur += 900;
+                    reelEls[r].reel.classList.add('anticipate');
+                }
+                const cells = Math.max(4, Math.round(dur / 1000 * SLOT_SPEED) - 3);
+                const filler = Array.from({ length: cells }, () => slotPick(SLOT.WEIGHTS, slotRnd));
                 // New symbols sit at the top of the strip and slide down into view
                 const items = [...grid[r], ...filler, ...prev[r]];
                 const strip = reelEls[r].strip;
@@ -2711,19 +2727,17 @@
                 strip.style.transform = `translateY(${-(items.length - 3) * cellH}px)`;
                 strip.replaceChildren(...items.map(symEl));
                 void strip.offsetHeight;
-                let dur = quick ? 250 : 800 + r * 320;
-                const anticipate = r === 4 && nearMiss && !quick;
-                if (anticipate) {
-                    dur += 1100;
-                    reelEls[r].reel.classList.add('anticipate');
-                }
-                strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.85, 0.25, 1.04)`;
+                reelEls[r].reel.classList.add('spinning');
+                strip.style.transition = `transform ${dur}ms linear`;
                 strip.style.transform = 'translateY(0)';
                 jobs.push(sleep(dur).then(() => {
                     strip.style.transition = 'none';
                     strip.style.transform = 'none';
                     setStrip(r, grid[r]);
-                    reelEls[r].reel.classList.remove('anticipate');
+                    const reel = reelEls[r].reel;
+                    reel.classList.remove('anticipate', 'spinning');
+                    reel.classList.add('thud');
+                    setTimeout(() => reel.classList.remove('thud'), 160);
                     tone(150, 0.1, 'sine', 0.22, 70);
                     tone(800, 0.03, 'square', 0.04, 450);
                     let landedClovers = 0;
