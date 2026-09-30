@@ -297,16 +297,16 @@
         #win-overlay.out { opacity: 0; }
 
         #win-overlay .wo-label {
-            font-size: 1rem;
-            font-weight: bold;
-            letter-spacing: 6px;
+            font-size: clamp(1.1rem, 5vw, 1.9rem);
+            font-weight: 800;
+            letter-spacing: 8px;
             text-transform: uppercase;
             color: #fff;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
         }
 
         #win-overlay .wo-amount {
-            font-size: clamp(3rem, 14vw, 6rem);
+            font-size: clamp(4.5rem, 26vw, 12rem);
             font-weight: 900;
             line-height: 1.05;
             font-variant-numeric: tabular-nums;
@@ -316,8 +316,62 @@
             background-clip: text;
             color: transparent;
             filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 24px rgba(226, 182, 70, 0.8));
-            animation: shine 1.4s linear infinite;
+            animation: shine 1.4s linear infinite, throb 0.5s ease-in-out infinite alternate;
         }
+
+        @keyframes throb {
+            from { scale: 1; }
+            to { scale: 1.07; }
+        }
+
+        @keyframes spinRays {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        #win-overlay::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 190vmax;
+            height: 190vmax;
+            transform: translate(-50%, -50%);
+            background: repeating-conic-gradient(from 0deg, rgba(255, 226, 122, 0.32) 0deg 7deg, rgba(255, 226, 122, 0) 7deg 20deg);
+            -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+            mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+            animation: spinRays 14s linear infinite;
+            z-index: -1;
+        }
+
+        #win-overlay.big::before { background: repeating-conic-gradient(from 0deg, rgba(255, 226, 122, 0.5) 0deg 9deg, rgba(255, 226, 122, 0) 9deg 20deg); animation-duration: 8s; }
+
+        #win-dim {
+            position: fixed;
+            inset: 0;
+            z-index: 14;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.78));
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+
+        #win-dim.show { opacity: 1; }
+
+        #win-flash {
+            position: fixed;
+            inset: 0;
+            z-index: 16;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 42%, #fff, rgba(255, 226, 122, 0.6) 50%, rgba(255, 226, 122, 0));
+            opacity: 0;
+        }
+
+        #win-flash.go { animation: flash 0.7s ease-out; }
 
         #win-overlay.big .wo-label { color: #ffe27a; letter-spacing: 10px; }
 
@@ -342,6 +396,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             #spin-btn:not(:disabled) { animation: none; }
+            #win-overlay::before, #win-overlay .wo-amount, #win-flash.go { animation: none; }
         }
 
         .chip-stack {
@@ -488,6 +543,8 @@
         </section>
     </main>
 
+    <div id="win-dim"></div>
+    <div id="win-flash"></div>
     <div id="win-overlay" hidden><div class="wo-label"></div><div class="wo-amount"></div></div>
     <canvas id="fx"></canvas>
 
@@ -750,7 +807,14 @@
             chip: () => { tone(900, 0.06, 'square', 0.08, 450); tone(1400, 0.04, 'triangle', 0.06, 900, 0.02); },
             tick: t => tone(1800 - t * 900, 0.03, 'triangle', 0.05 * (1 - t * 0.6), 900),
             drop: () => { tone(300, 0.12, 'sine', 0.2, 120); tone(520, 0.08, 'triangle', 0.1, 260, 0.1); },
-            win: big => [523, 659, 784, 1047, ...(big ? [1319, 1568] : [])].forEach((f, i) => tone(f, 0.22, 'triangle', 0.14, f, i * 0.09)),
+            win: big => {
+                [523, 659, 784, 1047, ...(big ? [1319, 1568, 2093] : [])].forEach((f, i) => tone(f, 0.22, 'triangle', 0.14, f, i * 0.09));
+                if (big) {
+                    [262, 330, 392].forEach(f => tone(f, 0.9, 'sine', 0.09, f, 0.1));
+                    tone(200, 0.8, 'sawtooth', 0.04, 1600, 0);
+                    for (let i = 0; i < 14; i++) tone(1800 + Math.random() * 900, 0.06, 'triangle', 0.045, 2600, 0.6 + i * 0.09);
+                }
+            },
             lose: () => tone(220, 0.35, 'sawtooth', 0.09, 70),
             deny: () => tone(180, 0.12, 'square', 0.08, 120)
         };
@@ -845,6 +909,55 @@
             fxCtx.restore();
         }
 
+        function drawStar(x, y, r, color) {
+            fxCtx.save();
+            fxCtx.translate(x, y);
+            fxCtx.fillStyle = color;
+            fxCtx.shadowColor = color;
+            fxCtx.shadowBlur = 10;
+            fxCtx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                const a = i * Math.PI / 4;
+                const rad = i % 2 ? r * 0.25 : r;
+                fxCtx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+            }
+            fxCtx.closePath();
+            fxCtx.fill();
+            fxCtx.restore();
+        }
+
+        // Coins falling from the top of the screen
+        function coinRain(count) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    particles.push({
+                        x: Math.random() * fx.width, y: -20,
+                        vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 5,
+                        w: 0, h: 0, rot: Math.random() * 6, vr: 0.2 + Math.random() * 0.3,
+                        color: '#ffe27a', life: 1.6, coin: true
+                    });
+                    startFx();
+                }, i * 25);
+            }
+        }
+
+        // Twinkling stars drifting out of a point
+        function sparkles(count, x, y) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const colors = ['#fff6c8', '#ffe27a', '#ffffff', '#ffd35c'];
+            for (let i = 0; i < count; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const sp = 1 + Math.random() * 6;
+                particles.push({
+                    x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                    w: 8 + Math.random() * 14, h: 0, rot: Math.random() * 6, vr: 0.15 + Math.random() * 0.2,
+                    color: colors[i % colors.length], life: 1 + Math.random() * 0.6, star: true
+                });
+            }
+            startFx();
+        }
+
         function stepFx(now) {
             fxCtx.clearRect(0, 0, fx.width, fx.height);
             coins = coins.filter(c => {
@@ -866,18 +979,24 @@
             });
             particles = particles.filter(p => p.life > 0 && p.y < fx.height + 20);
             for (const p of particles) {
-                p.vy += 0.3;
+                p.vy += p.star ? 0.02 : 0.3;
                 p.vx *= 0.99;
                 p.x += p.vx;
                 p.y += p.vy;
                 p.rot += p.vr;
                 p.life -= 0.008;
                 fxCtx.save();
-                fxCtx.globalAlpha = Math.max(p.life, 0);
-                fxCtx.translate(p.x, p.y);
-                fxCtx.rotate(p.rot);
-                fxCtx.fillStyle = p.color;
-                fxCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                fxCtx.globalAlpha = Math.max(Math.min(p.life * 2, 1), 0);
+                if (p.coin) {
+                    drawCoin(p.x, p.y, Math.abs(Math.cos(p.rot)));
+                } else if (p.star) {
+                    drawStar(p.x, p.y, p.w * (0.6 + 0.4 * Math.sin(p.rot * 3)), p.color);
+                } else {
+                    fxCtx.translate(p.x, p.y);
+                    fxCtx.rotate(p.rot);
+                    fxCtx.fillStyle = p.color;
+                    fxCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                }
                 fxCtx.restore();
             }
             if (particles.length || coins.length) {
@@ -903,22 +1022,34 @@
 
         function showWin(amount, ratio) {
             const box = $('win-overlay');
-            const tier = ratio >= 30 ? ['MEGA KAZANÇ', true] : ratio >= 10 ? ['BÜYÜK KAZANÇ', true] : ['KAZANDINIZ', false];
-            box.querySelector('.wo-label').textContent = tier[0];
-            box.classList.toggle('big', tier[1]);
+            const mega = ratio >= 30;
+            const big = ratio >= 10;
+            box.querySelector('.wo-label').textContent = mega ? 'MEGA KAZANÇ' : big ? 'BÜYÜK KAZANÇ' : 'KAZANDINIZ';
+            box.classList.toggle('big', big);
             box.classList.remove('out');
             box.hidden = false;
             box.style.animation = 'none';
             void box.offsetWidth;
             box.style.animation = '';
-            const amountEl = box.querySelector('.wo-amount');
-            countUp(amountEl, 0, amount, 1100);
-            amountEl.textContent = '0';
+            $('win-dim').classList.add('show');
+            if (big) {
+                const flash = $('win-flash');
+                flash.classList.remove('go');
+                void flash.offsetWidth;
+                flash.classList.add('go');
+            }
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight * 0.42;
+            sparkles(mega ? 90 : big ? 60 : 36, cx, cy);
+            setTimeout(() => sparkles(big ? 40 : 20, cx, cy), 500);
+            if (big) coinRain(mega ? 110 : 55);
+            countUp(box.querySelector('.wo-amount'), 0, amount, big ? 1800 : 1300);
             clearTimeout(winTimer);
             winTimer = setTimeout(() => {
                 box.classList.add('out');
+                $('win-dim').classList.remove('show');
                 winTimer = setTimeout(() => { box.hidden = true; }, 500);
-            }, 2600);
+            }, big ? 4200 : 3200);
         }
 
         function countUp(el, from, to, ms = 1000, delay = 0) {
@@ -1330,8 +1461,9 @@
                 countUp($('balance'), balanceBefore, balance, 900, 900);
                 countUp($('last-win'), 0, winnings, 900, 900);
                 showWin(winnings, ratio);
-                coinsToBalance(Math.min(30, Math.round(8 + ratio * 2)), $('wheel'), $('balance'));
-                confetti(Math.min(220, Math.round(50 + ratio * 12)), $('wheel'));
+                coinsToBalance(Math.min(40, Math.round(12 + ratio * 2)), $('wheel'), $('balance'));
+                confetti(Math.min(320, Math.round(90 + ratio * 14)), $('wheel'));
+                if (big) setTimeout(() => confetti(120, $('balance')), 700);
                 sfx.win(big);
                 vibrate(big ? [60, 40, 60, 40, 120] : [40, 30, 40]);
             } else {
