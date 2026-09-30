@@ -1656,17 +1656,24 @@
         }
 
         // Press or swipe across the board to place one chip on each cell touched
+        // Bets placed in the current swipe: key -> path length when it was last placed
         let swipeVisited = null;
+        let swipeTravel = 0;
+        let swipeLastKey = null;
         let swipePrev = null;
         let swipeDir = { x: 1, y: 0 };
         const SWIPE_EDGE = 0.36;
+        const SWIPE_REPEAT = 40;
 
         function swipeAt(x, y) {
             const cell = cellNear(x, y);
             if (!cell) return;
             const key = resolveTarget(cell, x, y, swipeDir, SWIPE_EDGE);
-            if (swipeVisited.has(key)) return;
-            swipeVisited.add(key);
+            if (key === swipeLastKey) return;
+            swipeLastKey = key;
+            // Passing the same spot again (after leaving it) adds another chip
+            if (swipeVisited.has(key) && swipeTravel - swipeVisited.get(key) < SWIPE_REPEAT) return;
+            swipeVisited.set(key, swipeTravel);
             placeBet(key);
         }
 
@@ -1680,17 +1687,23 @@
             if (dist >= 3) swipeDir = { x: dx, y: dy };
             swipePrev = { x, y };
             const steps = Math.ceil(dist / 3);
-            for (let i = 1; i <= steps; i++) swipeAt(from.x + dx * i / steps, from.y + dy * i / steps);
+            for (let i = 1; i <= steps; i++) {
+                swipeTravel += dist / steps;
+                swipeAt(from.x + dx * i / steps, from.y + dy * i / steps);
+            }
         }
 
         board.addEventListener('pointerdown', e => {
             if (e.button !== 0 || spinning) return;
-            swipeVisited = new Set();
+            swipeVisited = new Map();
+            swipeTravel = 0;
+            swipeLastKey = null;
             swipePrev = { x: e.clientX, y: e.clientY };
             const cell = cellNear(e.clientX, e.clientY);
             if (!cell) return;
             const key = resolveTarget(cell, e.clientX, e.clientY);
-            swipeVisited.add(key);
+            swipeVisited.set(key, 0);
+            swipeLastKey = key;
             placeBet(key);
         });
         board.addEventListener('pointermove', e => {
