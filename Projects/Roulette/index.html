@@ -434,7 +434,7 @@
             </div>
 
             <div class="payouts">
-                Minimum: sayı / split / köşe 5 · dış bahisler 100 · toplam 100<br>Kutu kenarına basın: split 17:1 · köşesine basın: 4'lü 8:1<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
+                Minimum: sayı / split / köşe 5 · dış bahisler 100 · toplam 100<br>Kutu kenarı: split 17:1 (0 dahil) · köşe: 4'lü 8:1 · düzine tarafındaki kenar: street 11:1<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
             </div>
         </section>
     </main>
@@ -460,7 +460,7 @@
         const MIN_TOTAL = 100;
         const MIN_NUMBER = 5;
         const MIN_OUTSIDE = 100;
-        const isNumberBet = key => /^[nsc]\d/.test(key);
+        const isNumberBet = key => /^[nsct]\d/.test(key);
         const minBetFor = key => isNumberBet(key) ? MIN_NUMBER : MIN_OUTSIDE;
 
         const colorOf = n => n === 0 ? 'green' : (REDS.has(n) ? 'red' : 'black');
@@ -603,6 +603,29 @@
 
         let renderedBets = {};
 
+        // Chip sits on the shared edge (0 split, street) or the middle of the numbers it covers
+        function multiChipPos(nums) {
+            const els = nums.map(n => cellEls['n' + n]);
+            const centerX = els.reduce((a, e) => a + e.offsetLeft + e.offsetWidth / 2, 0) / els.length;
+            const centerY = els.reduce((a, e) => a + e.offsetTop + e.offsetHeight / 2, 0) / els.length;
+            const vertical = board.classList.contains('vertical');
+            if (nums.length === 2 && nums[0] === 0) {
+                const a = cellEls['n' + nums[1]];
+                const z = cellEls.n0;
+                const zeroLeft = z.offsetLeft + z.offsetWidth <= a.offsetLeft + 1;
+                return zeroLeft
+                    ? { cx: a.offsetLeft - 1.5, cy: a.offsetTop + a.offsetHeight / 2 }
+                    : { cx: a.offsetLeft + a.offsetWidth / 2, cy: a.offsetTop - 1.5 };
+            }
+            if (nums.length === 3) {
+                const a = cellEls['n' + nums[0]];
+                return vertical
+                    ? { cx: a.offsetLeft - 1.5, cy: centerY }
+                    : { cx: centerX, cy: a.offsetTop + a.offsetHeight + 1.5 };
+            }
+            return { cx: centerX, cy: centerY };
+        }
+
         function renderBets() {
             for (let n = 0; n <= 36; n++) {
                 const el = cellEls['n' + n];
@@ -631,9 +654,7 @@
             board.querySelectorAll('.chip-stack.multi').forEach(c => c.remove());
             for (const key of Object.keys(bets)) {
                 if (cellEls[key]) continue;
-                const els = BET_TYPES[key].nums.map(n => cellEls['n' + n]);
-                const cx = els.reduce((a, e) => a + e.offsetLeft + e.offsetWidth / 2, 0) / els.length;
-                const cy = els.reduce((a, e) => a + e.offsetTop + e.offsetHeight / 2, 0) / els.length;
+                const { cx, cy } = multiChipPos(BET_TYPES[key].nums);
                 const chip = document.createElement('div');
                 chip.className = 'chip-stack multi' + (renderedBets[key] !== bets[key] ? ' pop' : '');
                 chip.style.setProperty('--chip-color', chipColorFor(bets[key]));
@@ -1186,10 +1207,10 @@
             requestAnimationFrame(idle);
         }
 
-        // Pressing near the edge or corner of a number cell bets on 2 or 4 adjacent numbers
+        // Pressing near the edge or corner of a number cell bets on 2, 3 or 4 adjacent numbers
         function numOf(el) {
             const m = /^n(\d+)$/.exec(el?.dataset.key || '');
-            return m && +m[1] >= 1 ? +m[1] : null;
+            return m ? +m[1] : null;
         }
 
         function cellAt(x, y) {
@@ -1197,18 +1218,32 @@
             return c && board.contains(c) ? c : null;
         }
 
+        const MULTI_TYPES = { 2: ['s', 17], 3: ['t', 11], 4: ['c', 8] };
+
         function multiKey(nums) {
             nums = [...new Set(nums)].sort((a, b) => a - b);
-            const key = (nums.length === 2 ? 's' : 'c') + nums.join('_');
+            const [prefix, payout] = MULTI_TYPES[nums.length];
+            const key = prefix + nums.join('_');
             if (!BET_TYPES[key]) {
-                BET_TYPES[key] = { label: nums.join('/'), payout: nums.length === 2 ? 17 : 8, nums, wins: r => nums.includes(r) };
+                BET_TYPES[key] = { label: nums.join('/'), payout, nums, wins: r => nums.includes(r) };
             }
             return key;
         }
 
+        // Edge neighbour of a number cell: another number or 0 makes a split, the dozens row/column makes a street
+        function edgeTarget(n, neighbour) {
+            const other = numOf(neighbour);
+            if (other !== null) return multiKey([n, other]);
+            if (neighbour?.dataset.key.startsWith('doz')) {
+                const first = Math.floor((n - 1) / 3) * 3 + 1;
+                return multiKey([first, first + 1, first + 2]);
+            }
+            return null;
+        }
+
         function resolveTarget(cell, x, y) {
             const n = numOf(cell);
-            if (n === null) return cell.dataset.key;
+            if (n === null || n === 0) return cell.dataset.key;
             const r = cell.getBoundingClientRect();
             const dx = (x - r.left) / r.width;
             const dy = (y - r.top) / r.height;
@@ -1220,18 +1255,20 @@
             const py = sy < 0 ? r.top - OFF : r.bottom + OFF;
             const cx = r.left + r.width / 2;
             const cy = r.top + r.height / 2;
-            const h = sx ? numOf(cellAt(px, cy)) : null;
-            const v = sy ? numOf(cellAt(cx, py)) : null;
+            const hEl = sx ? cellAt(px, cy) : null;
+            const vEl = sy ? cellAt(cx, py) : null;
+            const axes = [];
             if (sx && sy) {
-                const d = numOf(cellAt(px, py));
+                const h = numOf(hEl), v = numOf(vEl), d = numOf(cellAt(px, py));
                 if (h && v && d) return multiKey([n, h, v, d]);
                 const horizontalCloser = Math.min(dx, 1 - dx) < Math.min(dy, 1 - dy);
-                const first = horizontalCloser ? h : v;
-                const second = horizontalCloser ? v : h;
-                if (first) return multiKey([n, first]);
-                if (second) return multiKey([n, second]);
-            } else if (h || v) {
-                return multiKey([n, h || v]);
+                axes.push(...(horizontalCloser ? [hEl, vEl] : [vEl, hEl]));
+            } else {
+                axes.push(hEl || vEl);
+            }
+            for (const neighbour of axes) {
+                const key = edgeTarget(n, neighbour);
+                if (key) return key;
             }
             return cell.dataset.key;
         }
