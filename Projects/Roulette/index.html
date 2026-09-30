@@ -1477,6 +1477,7 @@
             let lastTick = Math.floor(b0 / SEG);
             let lastWheelTick = Math.floor(w0 / SEG);
             let lastWheelTickAt = 0;
+            let lastBallTickAt = 0;
             let dropped = false;
             const start = performance.now();
 
@@ -1493,10 +1494,13 @@
                 const wheelIdx = Math.floor(wheelAngle / SEG);
                 if (wheelIdx !== lastWheelTick) {
                     lastWheelTick = wheelIdx;
-                    if (now - lastWheelTickAt > 28) { lastWheelTickAt = now; sfx.wheelTick(t); }
+                    if (now - lastWheelTickAt > 110) { lastWheelTickAt = now; sfx.wheelTick(t); }
                 }
                 const tickIdx = Math.floor(ballAngle / SEG);
-                if (tickIdx !== lastTick && t < 0.92) { lastTick = tickIdx; sfx.tick(t); }
+                if (tickIdx !== lastTick && t < 0.92) {
+                    lastTick = tickIdx;
+                    if (now - lastBallTickAt > 80) { lastBallTickAt = now; sfx.tick(t); }
+                }
                 if (!dropped && dropT > 0.5) { dropped = true; sfx.drop(); vibrate(15); }
 
                 drawWheel();
