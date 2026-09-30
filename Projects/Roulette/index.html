@@ -2704,10 +2704,11 @@
             $('clover-count').hidden = true;
             for (let r = 0; r < 5; r++) {
                 const filler = Array.from({ length: 12 + r * 5 }, () => slotPick(SLOT.WEIGHTS, slotRnd));
-                const items = [...prev[r], ...filler, ...grid[r]];
+                // New symbols sit at the top of the strip and slide down into view
+                const items = [...grid[r], ...filler, ...prev[r]];
                 const strip = reelEls[r].strip;
                 strip.style.transition = 'none';
-                strip.style.transform = 'translateY(0)';
+                strip.style.transform = `translateY(${-(items.length - 3) * cellH}px)`;
                 strip.replaceChildren(...items.map(symEl));
                 void strip.offsetHeight;
                 let dur = quick ? 250 : 800 + r * 320;
@@ -2716,8 +2717,8 @@
                     dur += 1100;
                     reelEls[r].reel.classList.add('anticipate');
                 }
-                strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.85, 0.25, 1.05)`;
-                strip.style.transform = `translateY(${-(items.length - 3) * cellH}px)`;
+                strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.85, 0.25, 1.04)`;
+                strip.style.transform = 'translateY(0)';
                 jobs.push(sleep(dur).then(() => {
                     strip.style.transition = 'none';
                     strip.style.transform = 'none';
