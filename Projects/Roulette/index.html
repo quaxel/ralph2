@@ -151,6 +151,8 @@
             border-radius: 6px;
         }
 
+        .board { touch-action: none; }
+
         .board.vertical {
             grid-template-columns: 44px repeat(3, 1fr) 56px;
             grid-template-rows: repeat(14, 40px);
@@ -518,7 +520,6 @@
             el.style.gridRow = `${row} / span ${rowSpan}`;
             el.style.gridColumn = `${col} / span ${colSpan}`;
             el.dataset.key = key;
-            el.addEventListener('click', () => placeBet(key));
             el.addEventListener('contextmenu', e => { e.preventDefault(); removeBet(key); });
             board.appendChild(el);
             cellEls[key] = el;
@@ -1169,6 +1170,27 @@
             }
             requestAnimationFrame(idle);
         }
+
+        // Press or swipe across the board to place one chip on each cell touched
+        let swipeVisited = null;
+
+        function swipePlace(x, y) {
+            const cell = document.elementFromPoint(x, y)?.closest('.cell');
+            if (!cell || !board.contains(cell) || swipeVisited.has(cell.dataset.key)) return;
+            swipeVisited.add(cell.dataset.key);
+            placeBet(cell.dataset.key);
+        }
+
+        board.addEventListener('pointerdown', e => {
+            if (e.button !== 0 || spinning) return;
+            swipeVisited = new Set();
+            swipePlace(e.clientX, e.clientY);
+        });
+        board.addEventListener('pointermove', e => {
+            if (swipeVisited) swipePlace(e.clientX, e.clientY);
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
+            board.addEventListener(type, () => { swipeVisited = null; }));
 
         // ---------- Init ----------
         window.matchMedia('(max-width: 800px)').addEventListener('change', buildBoard);
