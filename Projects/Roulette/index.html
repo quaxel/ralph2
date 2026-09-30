@@ -253,7 +253,7 @@
         .stat.bump strong { color: #fff; }
 
         .wheel-wrap { position: relative; width: 100%; max-width: 380px; }
-        .wheel-wrap canvas { display: block; }
+        .wheel-wrap canvas { display: block; touch-action: none; cursor: grab; }
 
         .badge {
             position: absolute;
@@ -611,7 +611,7 @@
             </div>
 
             <div class="payouts">
-                Minimum: sayı / split / köşe 5 · dış bahisler 100 · toplam 100<br>Kutu kenarı: split 17:1 (0 dahil) · köşe: 4'lü 8:1 · düzine tarafındaki kenar: street 11:1<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
+                Çarkı kaydırarak çevirebilirsiniz<br>Minimum: sayı / split / köşe 5 · dış bahisler 100 · toplam 100<br>Kutu kenarı: split 17:1 (0 dahil) · köşe: 4'lü 8:1 · düzine tarafındaki kenar: street 11:1<br>Tek sayı 35:1 · Düzine / Sütun 2:1 · Kırmızı/Siyah · Tek/Çift · 1-18/19-36 1:1
             </div>
         </section>
     </main>
@@ -1715,6 +1715,32 @@
         });
         ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
             board.addEventListener(type, () => { swipeVisited = null; }));
+
+        // Swiping across the wheel spins it
+        const SPIN_SWIPE_DISTANCE = 50;
+        let wheelSwipe = null;
+
+        function swipeSpin() {
+            if (spinning) return;
+            if (!totalBet()) {
+                setMessage('Önce bahis koyun', 'lose');
+                return;
+            }
+            spin();
+        }
+
+        $('wheel').addEventListener('pointerdown', e => {
+            if (e.button === 0) wheelSwipe = { x: e.clientX, y: e.clientY };
+        });
+        $('wheel').addEventListener('pointermove', e => {
+            if (!wheelSwipe) return;
+            if (Math.hypot(e.clientX - wheelSwipe.x, e.clientY - wheelSwipe.y) >= SPIN_SWIPE_DISTANCE) {
+                wheelSwipe = null;
+                swipeSpin();
+            }
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
+            $('wheel').addEventListener(type, () => { wheelSwipe = null; }));
 
         // ---------- Init ----------
         window.matchMedia('(max-width: 800px)').addEventListener('change', buildBoard);
