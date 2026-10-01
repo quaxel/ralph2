@@ -2650,7 +2650,7 @@
         // Math (RTP about 94.55% with the starting jackpot values, simulated over 40 million spins)
         const SLOT = {
             SYMBOLS: ['cherry', 'lemon', 'orange', 'apple', 'grape', 'melon', 'bell', 'seven', 'star', 'clover'],
-            WEIGHTS: [24, 22, 16, 12, 8, 6, 4, 2, 4, 9],
+            WEIGHTS: [24, 22, 16, 12, 8, 6, 4, 2, 4, 12],
             PAY: {
                 cherry: [12, 35, 110], lemon: [12, 35, 110], orange: [17, 55, 165], apple: [22, 67, 220],
                 grape: [33, 110, 330], melon: [33, 110, 330], bell: [66, 220, 660], seven: [165, 550, 2750]
@@ -2665,14 +2665,14 @@
             ],
             TRIGGER: 5,
             RESPINS: 3,
-            LAND_CHANCE: 0.07,
+            LAND_CHANCE: 0.0375,
             JACKPOTS: { mini: 20, minor: 100, maxi: 200, major: 400, grand: 1000 },
             RED_REELS: [0, 2, 4],
             P_RED: 0.05,
-            P_GOLD: 0.03,
-            P_JACKPOT: { major: 0.004, maxi: 0.006, minor: 0.012, mini: 0.035 },
+            P_GOLD: 0.015,
+            P_JACKPOT: { major: 0.0015, maxi: 0.0025, minor: 0.005, mini: 0.015 },
             CREDITS: [0.5, 1, 2, 3, 5, 10],
-            CREDIT_WEIGHTS: [38, 32, 17, 7, 5, 1],
+            CREDIT_WEIGHTS: [45, 32, 14, 5, 3, 1],
             GOLD_CASH: [5, 10, 20, 50],
             GOLD_WEIGHTS: [50, 30, 15, 5],
             FULL_SCREEN_MULT: 2
