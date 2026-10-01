@@ -2647,7 +2647,7 @@
             $('wheel').addEventListener(type, () => { wheelSwipe = null; }));
 
         // ---------- Slot: Clover Link ----------
-        // Math (RTP about 93% with the starting jackpot values, simulated over 6 million spins)
+        // Math (RTP about 94.55% with the starting jackpot values, simulated over 40 million spins)
         const SLOT = {
             SYMBOLS: ['cherry', 'lemon', 'orange', 'apple', 'grape', 'melon', 'bell', 'seven', 'star', 'clover'],
             WEIGHTS: [24, 22, 16, 12, 8, 6, 4, 2, 4, 9],
@@ -2665,7 +2665,7 @@
             ],
             TRIGGER: 5,
             RESPINS: 3,
-            LAND_CHANCE: 0.068,
+            LAND_CHANCE: 0.07,
             JACKPOTS: { mini: 20, minor: 100, maxi: 200, major: 400, grand: 1000 },
             RED_REELS: [0, 2, 4],
             P_RED: 0.05,
@@ -3476,7 +3476,7 @@
                     <li>Kırmızı GRAND yoncası yalnızca 1., 3. ve 5. makarada çıkar. Üçünü de toplarsanız GRAND ${SLOT.JACKPOTS.grand}× ile başlayan jackpotu kazanırsınız.</li>
                     <li>Altın yonca daha yüksek nakit taşır (bahsin 5× ile 50× arası).</li>
                     <li>Dolu ekranda tüm nakit ve altın yonca değerleri ×${SLOT.FULL_SCREEN_MULT} olur, jackpotlar katlanmaz.</li>
-                    <li>Oyun parasıyla oynanır, teorik geri ödeme yaklaşık %93 (jackpotlar büyüdükçe artar).</li>
+                    <li>Oyun parasıyla oynanır, teorik geri ödeme yaklaşık %94,55 (jackpotlar büyüdükçe artar).</li>
                 </ul>`;
             $('pay-panel').hidden = false;
         }
