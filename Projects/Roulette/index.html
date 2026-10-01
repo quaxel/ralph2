@@ -3893,10 +3893,11 @@
         // ---------- Blackjack ----------
         // 6 decks, dealer stands on all 17s and peeks for blackjack, blackjack pays 3:2,
         // double on any two cards (also after a split), split up to 4 hands, aces get one card each, insurance 2:1
-        const BJ_MIN = 50;
+        const BJ_MIN = 25;
         const BJ_MAX = 5000;
         const BJ_DECKS = 6;
         const BJ_CHIPS = [
+            { value: 25, color: '#388e3c' },
             { value: 50, color: '#ef6c00' },
             { value: 100, color: '#212121' },
             { value: 250, color: '#7b1fa2' },
@@ -4188,7 +4189,7 @@
                 if (h.bust) { label = 'BUST'; cls = 'lose'; }
                 else if (h.bj) {
                     if (dealerBJ) { ret = h.bet; label = 'BERABERE'; cls = 'push'; }
-                    else { ret = h.bet * 2.5; label = 'BLACKJACK'; cls = 'bj'; bjWin = true; }
+                    else { ret = Math.round(h.bet * 2.5); label = 'BLACKJACK'; cls = 'bj'; bjWin = true; }
                 } else if (dealerBJ) { label = 'KAYIP'; cls = 'lose'; }
                 else {
                     const p = bjScore(h.cards).total;
