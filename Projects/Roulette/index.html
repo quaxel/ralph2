@@ -1423,8 +1423,8 @@
         .bj-main:disabled { opacity: 0.45; cursor: not-allowed; animation: none; }
 
         .bj-act {
-            flex: 1 1 70px;
-            max-width: 130px;
+            flex: 1 1 60px;
+            max-width: 110px;
             padding: 12px 8px;
             border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 12px;
@@ -1741,7 +1741,7 @@
 
     <section id="bj-view" class="bj" hidden>
         <div class="bj-table">
-            <div class="bj-rules">BLACKJACK 3'E 2 ÖDER · KURPİYER TÜM 17'LERDE DURUR · SİGORTA 2'YE 1</div>
+            <div class="bj-rules">BLACKJACK 3'E 2 ÖDER · KURPİYER TÜM 17'LERDE DURUR · SİGORTA 2'YE 1 · GEÇ TESLİM</div>
             <div class="bj-shoe" id="bj-shoe" aria-label="Deste"><i></i><i></i><i></i><b id="bj-shoe-count">312</b></div>
 
             <div class="bj-seat dealer">
@@ -1777,6 +1777,7 @@
                 <button class="bj-act" id="bj-stand" type="button">DUR</button>
                 <button class="bj-act" id="bj-double" type="button">KATLA</button>
                 <button class="bj-act" id="bj-split" type="button">BÖL</button>
+                <button class="bj-act" id="bj-surrender" type="button">TESLİM</button>
             </div>
             <label class="bj-hint-toggle"><input type="checkbox" id="bj-hint"> Strateji ipucu</label>
         </div>
@@ -4046,7 +4047,7 @@
         }
 
         // ---------- Basic strategy (dealer stands on soft 17, double after split) ----------
-        function bjAdvice(h, canDouble, canSplit) {
+        function bjAdvice(h, canDouble, canSplit, canSurrender) {
             const up = bjVal(bjDealer[0]);
             const [a, b] = h.cards.map(bjVal);
             const dbl = alt => (canDouble ? 'D' : alt);
@@ -4060,6 +4061,7 @@
             }
             const sc = bjScore(h.cards);
             const t = sc.total;
+            if (canSurrender && !sc.soft && ((t === 16 && (up >= 9)) || (t === 15 && up === 10))) return 'R';
             if (sc.soft) {
                 if (t >= 19) return 'S';
                 if (t === 18) return [3, 4, 5, 6].includes(up) ? (canDouble ? 'D' : 'S') : [2, 7, 8].includes(up) ? 'S' : 'H';
@@ -4079,7 +4081,8 @@
         // ---------- Controls ----------
         const bjCan = h => ({
             double: h.cards.length === 2 && balance >= h.bet,
-            split: h.cards.length === 2 && bjVal(h.cards[0]) === bjVal(h.cards[1]) && bjHands.length < 4 && balance >= h.bet && !h.aces
+            split: h.cards.length === 2 && bjVal(h.cards[0]) === bjVal(h.cards[1]) && bjHands.length < 4 && balance >= h.bet && !h.aces,
+            surrender: h.cards.length === 2 && bjHands.length === 1 && !h.split
         });
 
         function bjAsk() {
@@ -4131,18 +4134,19 @@
             $('bj-rebet').disabled = bjBusy || !bjLastBet || bjLastBet > balance + bjBet;
             $('bj-bet2').disabled = bjBusy || !bjBet || bjBet * 2 > BJ_MAX || bjBet > balance;
             const h = bjHands[bjActive];
-            const can = h && bjAwaiting && bjPhase === 'player' ? bjCan(h) : { double: false, split: false };
+            const can = h && bjAwaiting && bjPhase === 'player' ? bjCan(h) : { double: false, split: false, surrender: false };
             const on = bjAwaiting && bjPhase === 'player';
             $('bj-hit').disabled = !on;
             $('bj-stand').disabled = !on;
             $('bj-double').disabled = !(on && can.double);
             $('bj-split').disabled = !(on && can.split);
+            $('bj-surrender').disabled = !(on && can.surrender);
             $('bj-ins-yes').disabled = !(bjAwaiting && bjPhase === 'insurance');
             $('bj-ins-no').disabled = !(bjAwaiting && bjPhase === 'insurance');
-            const rec = on && bjHint ? bjAdvice(h, can.double, can.split) : '';
-            const map = { H: 'bj-hit', S: 'bj-stand', D: 'bj-double', P: 'bj-split' };
+            const rec = on && bjHint ? bjAdvice(h, can.double, can.split, can.surrender) : '';
+            const map = { H: 'bj-hit', S: 'bj-stand', D: 'bj-double', P: 'bj-split', R: 'bj-surrender' };
             for (const id of Object.values(map)) $(id).classList.toggle('rec', map[rec] === id);
-            if (on && bjHint) bjMsg('Öneri: ' + { H: 'ÇEK', S: 'DUR', D: 'KATLA', P: 'BÖL' }[rec], 'hint');
+            if (on && bjHint) bjMsg('Öneri: ' + { H: 'ÇEK', S: 'DUR', D: 'KATLA', P: 'BÖL', R: 'TESLİM' }[rec], 'hint');
         }
 
         function bjPlace(value) {
@@ -4186,7 +4190,8 @@
                 let ret = 0;
                 let label;
                 let cls;
-                if (h.bust) { label = 'BUST'; cls = 'lose'; }
+                if (h.surrender) { ret = Math.round(h.bet / 2); label = 'TESLİM'; cls = 'push'; }
+                else if (h.bust) { label = 'BUST'; cls = 'lose'; }
                 else if (h.bj) {
                     if (dealerBJ) { ret = h.bet; label = 'BERABERE'; cls = 'push'; }
                     else { ret = Math.round(h.bet * 2.5); label = 'BLACKJACK'; cls = 'bj'; bjWin = true; }
@@ -4202,7 +4207,7 @@
                 const net = ret - h.bet;
                 const tag = document.createElement('div');
                 tag.className = 'bj-result ' + cls;
-                tag.textContent = net > 0 ? `${label} +${net.toLocaleString('tr-TR')}` : net < 0 && cls !== 'lose' ? label : label;
+                tag.textContent = net > 0 ? `${label} +${net.toLocaleString('tr-TR')}` : h.surrender ? `${label} −${(h.bet - ret).toLocaleString('tr-TR')}` : label;
                 bjHandEls[i].root.appendChild(tag);
                 if (cls === 'lose' && h.bust) bjHandEls[i].root.classList.add('bust');
             });
@@ -4283,6 +4288,9 @@
                             if (s > 21) { h.bust = true; h.done = true; } else if (s === 21) h.done = true;
                         } else if (act === 'stand') {
                             h.done = true;
+                        } else if (act === 'surrender') {
+                            h.surrender = true;
+                            h.done = true;
                         } else if (act === 'double') {
                             balance -= h.bet;
                             h.bet *= 2;
@@ -4315,7 +4323,7 @@
             renderBj();
             await sleep(300);
             await bjReveal();
-            const live = bjHands.some(h => !h.bust && !h.bj);
+            const live = bjHands.some(h => !h.bust && !h.bj && !h.surrender);
             if (live && !dealerBJ) {
                 while (bjScore(bjDealer).total < 17) await bjDealCard('dealer');
             }
@@ -4341,7 +4349,7 @@
                 bjMsg('Berabere', 'push');
                 tone(600, 0.2, 'triangle', 0.1, 600);
             } else {
-                bjMsg(`Kaybettiniz −${Math.abs(net).toLocaleString('tr-TR')}`, 'lose');
+                bjMsg(`${bjHands.length === 1 && bjHands[0].surrender ? 'Teslim oldunuz' : 'Kaybettiniz'} −${Math.abs(net).toLocaleString('tr-TR')}`, 'lose');
                 sfx.lose();
                 vibrate(100);
             }
@@ -4376,6 +4384,7 @@
         $('bj-stand').addEventListener('click', () => bjChoose('stand'));
         $('bj-double').addEventListener('click', () => bjChoose('double'));
         $('bj-split').addEventListener('click', () => bjChoose('split'));
+        $('bj-surrender').addEventListener('click', () => bjChoose('surrender'));
         $('bj-ins-yes').addEventListener('click', () => bjChoose('ins-yes'));
         $('bj-ins-no').addEventListener('click', () => bjChoose('ins-no'));
         $('bj-hint').addEventListener('change', e => {
