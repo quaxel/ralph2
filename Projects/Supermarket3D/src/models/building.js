@@ -214,7 +214,7 @@ const M = {
 // ---------------------------------------------------------------------------
 // Building
 // ---------------------------------------------------------------------------
-export function createBuilding({ width = 40, depth = 30, height = 5, entranceX = 12, entranceWidth = 3.2, ceiling = true } = {}) {
+export function createBuilding({ width = 40, depth = 30, height = 5, entranceX = 12, entranceWidth = 3.2, ceiling = true, groundSize = 70 } = {}) {
   const group = new THREE.Group();
   group.name = 'Building';
   const T = 0.25;
@@ -430,7 +430,7 @@ export function createBuilding({ width = 40, depth = 30, height = 5, entranceX =
 
   // ---- Exterior ground ---------------------------------------------------------------
   {
-    const gw = 70, gd = 70, gcz = 8;
+    const gw = groundSize, gd = groundSize, gcz = 8;
     const gmat = new THREE.MeshStandardMaterial({ map: grassTex(), roughness: 1 });
     const gg = scaleUV(planeXZ(gw, gd, -0.03, true), gw / 4, gd / 4);
     gg.translate(0, 0, gcz);
@@ -535,7 +535,7 @@ export function createBuilding({ width = 40, depth = 30, height = 5, entranceX =
     if (!ctx || !ctx.playerPosition) return;
     _v.copy(ctx.playerPosition);
     group.worldToLocal(_v);
-    const near = Math.hypot(_v.x - entranceX, _v.z - zc) < 3;
+    const near = Math.hypot(_v.x - entranceX, _v.z - zc) < 4;
     const target = near ? 1 : 0;
     const step = Math.min(dt, 0.1) / 0.9;
     open += THREE.MathUtils.clamp(target - open, -step, step);

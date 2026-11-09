@@ -61,7 +61,7 @@ const MAT = {
   led: stdMat('#ffffff', { emissive: '#ffffff', emissiveIntensity: 2.2, roughness: 0.5 }),
   warmLed: stdMat('#fff3d6', { emissive: '#ffe9b8', emissiveIntensity: 2.0, roughness: 0.5 }),
   glass: stdMat('#d3ebf2', { transparent: true, opacity: 0.17, roughness: 0.05, metalness: 0.25, depthWrite: false }),
-  glassFrost: stdMat('#e6f2f8', { transparent: true, opacity: 0.26, roughness: 0.12, metalness: 0.15, depthWrite: false }),
+  glassFrost: stdMat('#e6f2f8', { transparent: true, opacity: 0.19, roughness: 0.12, metalness: 0.15, depthWrite: false }),
   priceStrip: stdMat('#ffd21f', { roughness: 0.5 }),
   frost: stdMat('#d9e7ee', { roughness: 0.9 }),
   wood: stdMat('#b98a55', { roughness: 0.7 }),
@@ -299,7 +299,7 @@ function stockShelf(pack, rng, P, level, o) {
 const PETS = ['#4b2a1c', '#f08a1c', '#9ad24b', '#cfe8f3', '#b71f2b', '#f3b24a', '#c98a30', '#7a3fa0'];
 const CANS = ['#c9202c', '#1f5fb0', '#cfd4d9', '#2f9a52', '#f0c52c', '#2b2b2f', '#f27c1d'];
 const WATERS = ['#cfe8f3', '#bfe0ee', '#d9eef5'];
-const DAIRYW = ['#f6f4ee', '#cfe3f5', '#f4e2a8', '#d4ecc8', '#f6d3d9'];
+const DAIRYW = ['#f6f4ee', '#8dbbe8', '#f2d06a', '#93d08a', '#f0929f', '#f6f4ee'];
 const DRINK_LEVELS = [
   { n: [2, 3], skus: [{ t: 'pet', s: [1, 1, 1], pal: PETS, rows: 3 }] },
   { n: [3], skus: [{ t: 'pet', s: [0.88, 0.8, 0.88], pal: PETS, rows: 3 }, { t: 'pet', s: [0.85, 0.85, 0.85], pal: WATERS, rows: 3 }] },
@@ -310,7 +310,7 @@ const DRINK_LEVELS = [
 const DAIRY_LEVELS = [
   { n: [2, 3], skus: [{ t: 'yogTub', s: [1.15, 1.15, 1.15], pal: DAIRYW.concat(['#f2dfae']), rows: 3 }] },
   { n: [3], skus: [{ t: 'carton', s: [1.05, 1.05, 1.05], pal: DAIRYW, rows: 3 }, { t: 'pet', s: [0.78, 0.72, 0.78], pal: ['#f4f4f0', '#e4eef8'], rows: 3 }] },
-  { n: [3], skus: [{ t: 'yogTub', s: [0.62, 0.7, 0.62], pal: ['#f6f4ee', '#e9a3b4', '#f4e0a0', '#a9d3a0'], rows: 4 }, { t: 'ayran', s: [1, 1, 1], pal: DAIRYW, rows: 3 }] },
+  { n: [3], skus: [{ t: 'yogTub', s: [0.8, 0.85, 0.8], pal: ['#f6f4ee', '#e9748c', '#f2c14e', '#6cbf6a', '#6aa6e0'], rows: 4 }, { t: 'ayran', s: [1, 1, 1], pal: DAIRYW, rows: 3 }] },
   { n: [3, 4], skus: [{ t: 'cheesePack', s: [1, 1, 1], stack: 4, pal: ['#f6f2e2', '#f0d27a', '#e9e1c8', '#c8e0c0', '#f4c868'], rows: 4 }] },
   { n: [3, 4], skus: [{ t: 'butter', s: [1, 1, 1], stack: 5, pal: ['#f2d36b', '#f6e08a', '#e8e2c8'], rows: 4 }, { t: 'cheesePack', s: [1, 1, 1], stack: 4, pal: ['#f6f2e2', '#d9b25a'], rows: 4 }] },
 ];
@@ -324,7 +324,7 @@ const FROZEN_LEVELS = [
 const COOLERS = {
   drinks: { sign: 'İÇECEKLER', color: '#0b57a4', levels: DRINK_LEVELS, glass: MAT.glass, tint: 0 },
   dairy: { sign: 'SÜT ÜRÜNLERİ', color: '#1c7a4a', levels: DAIRY_LEVELS, glass: MAT.glass, tint: 0 },
-  frozen: { sign: 'DONUK GIDA', color: '#12599b', levels: FROZEN_LEVELS, glass: MAT.glassFrost, tint: 0.28 },
+  frozen: { sign: 'DONUK GIDA', color: '#12599b', levels: FROZEN_LEVELS, glass: MAT.glassFrost, tint: 0.08 },
 };
 
 /* ------------------------------------------------------------------ */
@@ -574,7 +574,7 @@ export function createChestFreezer({ length = 2.4, width = 0.95, height = 0.9, c
       const P = M4(cx, pileTop, cz);
       const col = new THREE.Color(pick(rng, pals[type])).lerp(WHITE, 0.0);
       fillLane(pack, rng, P, {
-        type, s: [1, sy, 1], stack, rows: 3, x0: -cw / 2 + 0.025, x1: cw / 2 - 0.025, zFront: cd / 2 - 0.025, zBack: -cd / 2 + 0.025, y: 0,
+        type, s: [1, sy, 1], stack, rows: type === 'iceTub' ? 3 : 8, x0: -cw / 2 + 0.025, x1: cw / 2 - 0.025, zFront: cd / 2 - 0.025, zBack: -cd / 2 + 0.025, y: 0,
         color: col, gapX: 1.0, gapZ: 1.0,
       });
     }
@@ -783,24 +783,24 @@ export function showcase() {
   return g;
 }
 
-/** Every category of every factory (verification helper). */
-export function showcaseAll() {
-  const g = new THREE.Group(); g.name = 'RefrigerationAll';
-  const r1 = row([
+/** Every category of every factory (verification helpers). */
+export function showcaseCoolers() {
+  return row([
     [createReachInCooler({ doors: 3, category: 'drinks', seed: 1 })],
     [createReachInCooler({ doors: 3, category: 'dairy', seed: 2 })],
     [createReachInCooler({ doors: 3, category: 'frozen', seed: 3 })],
-  ], 0.8, 0);
-  const r2 = row([
+  ], 0.6);
+}
+export function showcaseDecks() {
+  return row([
     [createOpenMultideck({ category: 'dairy', seed: 2 })],
     [createOpenMultideck({ category: 'meat', seed: 3 })],
     [createOpenMultideck({ category: 'deli', seed: 4 })],
-  ], 0.8, 3.5);
-  const r3 = row([
+  ], 0.6);
+}
+export function showcaseChests() {
+  return row([
     [createChestFreezer({ category: 'icecream', seed: 3 })],
     [createChestFreezer({ category: 'frozen', seed: 5 })],
-    [createDeliCounter({ seed: 4 })],
-  ], 0.8, 7);
-  g.add(r1, r2, r3);
-  return g;
+  ], 0.6);
 }

@@ -64,7 +64,7 @@ export function buildStore(mods, log = console.warn) {
   }
 
   // ---------- Building ----------
-  const building = place('building', 'createBuilding', { ...STORE }, 0, 0, 0, 0, 'building');
+  const building = place('building', 'createBuilding', { ...STORE, groundSize: 500 }, 0, 0, 0, 0, 'building');
 
   // ---------- Back wall: reach-in coolers (z = -15) ----------
   const coolers = [['frozen', -18.15], ['frozen', -14.9], ['drinks', -11.65], ['drinks', -8.4], ['dairy', -5.15], ['dairy', -1.9]];
@@ -99,7 +99,7 @@ export function buildStore(mods, log = console.warn) {
     const a = GONDOLA_ROWS[i], b = GONDOLA_ROWS[i + 1];
     aisles.push([(a.x + b.x) / 2, [CAT_TR[a.cat[0]], CAT_TR[b.cat[0]]]]);
   }
-  aisles.forEach(([x, lines], i) => place('shelving', 'createAisleSign', { number: i + 1, lines, hangHeight: 2.75, ceilingHeight: STORE.height }, x, -6.1, HALF, 0, 'sign'));
+  aisles.forEach(([x, lines], i) => place('shelving', 'createAisleSign', { number: i + 1, lines, hangHeight: 2.75, ceilingHeight: STORE.height }, x, -2.6, 0, 0, 'sign'));
 
   // Left wall shelves (face +X)
   [['beverages', -9], ['beverages', -5], ['cleaning', -1], ['personal', 3]].forEach(([category, z], i) =>
@@ -149,7 +149,7 @@ export function buildStore(mods, log = console.warn) {
   place('props', 'createPottedPlant', { seed: 622 }, -19.3, 7.0);
   place('props', 'createATM', [], -15.6, 14.45, PI);
   place('props', 'createTrashBin', [], 15.2, 16.0);
-  place('props', 'createTrashBin', [], 4.0, 12.8);
+  place('props', 'createTrashBin', [], 5.0, 14.55);
 
   // Parking lot carts
   place('props', 'createShoppingCart', { seed: 630, color: 0x2e7d32 }, 6.5, 21.0, 0.6);

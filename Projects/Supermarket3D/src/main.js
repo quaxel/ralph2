@@ -110,6 +110,7 @@ function setMode(m) {
   orbit.enabled = m === 'doll' || m === 'outside';
   setCeiling(m !== 'doll');
   scene.fog.near = m === 'doll' ? 200 : 60;
+  scene.fog.far = m === 'doll' ? 500 : 160;
 
   if (m === 'walk') {
     camera.position.copy(player);
@@ -129,7 +130,7 @@ function setMode(m) {
   } else if (m === 'tour') {
     tourT = 0;
   }
-  orbit.update();
+  if (orbit.enabled) orbit.update();
 }
 
 $('btnWalk').onclick = () => setMode('walk');
@@ -205,10 +206,11 @@ let tourT = 0;
 const W = (x, z) => new THREE.Vector3(x, EYE, z);
 const laneWalkX = LANES[3] + WALKWAY_OFFSET;
 const tourCurve = new THREE.CatmullRomCurve3([
-  W(STORE.entranceX, 30), W(STORE.entranceX, 18), W(STORE.entranceX, 11), W(13.8, 6.3), W(13.8, 2.7), W(10.2, -0.4),
-  W(5.0, -2.5), W(9.5, -6.8), W(13.5, -10.0), W(8.5, -10.8), W(3.5, -12.5), W(-5.5, -12.8), W(-11.5, -12.0),
-  W(-11.5, -6.0), W(-11.5, -0.6), W(-6.0, 3.0), W(laneWalkX, 4.8), W(laneWalkX, 10.6), W(2.0, 12.4), W(STORE.entranceX, 12.0),
-  W(STORE.entranceX, 18), W(STORE.entranceX + 2, 30),
+  W(STORE.entranceX, 30), W(STORE.entranceX, 18), W(STORE.entranceX, 11.5), W(10.2, 7.0), W(10.2, 4.4), W(10.2, 1.0), W(10.0, -1.0),
+  W(9.5, -3.2), W(9.5, -6.8), W(9.4, -9.6), W(7.5, -10.6), W(4.5, -11.4), W(1.0, -12.0), W(-5.0, -12.0), W(-8.0, -11.7),
+  W(-8.5, -10.6), W(-8.5, -6.0), W(-8.5, -1.4), W(-7.4, 0.0), W(laneWalkX, 1.2), W(laneWalkX, 4.5), W(laneWalkX, 7.6),
+  W(laneWalkX, 10.6), W(-4.0, 11.6), W(2.0, 11.6), W(7.0, 11.8), W(11.0, 12.4), W(STORE.entranceX, 14.5),
+  W(STORE.entranceX, 19), W(STORE.entranceX + 2, 29),
 ], false, 'centripetal');
 const tourLen = tourCurve.getLength();
 const lookTmp = new THREE.Vector3();
@@ -246,6 +248,7 @@ const PRESETS = {
   deli: { pos: [6.0, EYE, -6.6], look: [10, 1.0, -13] },
   coolers: { pos: [-6.0, EYE, -10.8], look: [-12, 1.1, -14.6] },
   bakery: { pos: [12.5, EYE, -7.5], look: [18, 1.0, -12.5] },
+  cashier: { pos: [-15.6, 1.8, 5.0], look: [-13.85, 0.9, 8.1] },
 };
 
 // ---------------------------------------------------------------- frame loop
@@ -296,11 +299,12 @@ addEventListener('resize', () => {
   if (SHOT) {
     const p = PRESETS[SHOT] || PRESETS.exterior;
     setMode(p.mode || 'tour');
-    if (p.pos) {
+    if (p.target) { camera.position.set(...p.pos); orbit.target.set(...p.target); orbit.update(); }
+    else if (p.pos) {
       mode = 'shot'; orbit.enabled = false; setCeiling(true);
       camera.position.set(...p.pos);
       camera.lookAt(new THREE.Vector3(...p.look));
-    } else if (p.target) { camera.position.set(...p.pos); orbit.target.set(...p.target); orbit.update(); }
+    }
     document.querySelectorAll('#hud,#help,#area').forEach((el) => (el.style.display = params.has('hud') ? '' : 'none'));
   } else {
     setMode('outside');
@@ -316,6 +320,11 @@ addEventListener('resize', () => {
   let calls = 0, tris = 0;
   renderer.info.autoReset = false; renderer.info.reset(); renderer.render(scene, camera);
   calls = renderer.info.render.calls; tris = renderer.info.render.triangles; renderer.info.autoReset = true;
+  // Debug/test hooks: step the simulation without rendering.
+  window.__app = {
+    camera, scene, setMode, keys, colliders, get mode() { return mode; },
+    step(dt, n = 1) { for (let i = 0; i < n; i++) { if (mode === 'walk') updateWalk(dt); else if (mode === 'tour') updateTour(dt); ctx.time += dt; for (const o of updaters) o.userData.update(dt, ctx); } },
+  };
   window.__stats = { drawCalls: calls, triangles: tris, colliders: colliders.length, objects: placed.length, updaters: updaters.length };
   window.__ready = true;
 })().catch((e) => { console.error(e); window.__errors.push(String(e.stack || e)); window.__ready = true; });
