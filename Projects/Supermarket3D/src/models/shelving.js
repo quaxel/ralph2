@@ -485,7 +485,7 @@ function buildUnit(o) {
   const endD = depth * (double ? 0.985 : 1);
   for (const sx of [-1, 1]) st.box('base', 0.03, height - headerH - baseH, endD, sx * (length / 2 - 0.015), baseH, 0);
   // uprights
-  for (let k = 1; k < bays; k++) st.box('up', 0.04, height - headerH - baseH, 0.075, -length / 2 + k * bayW, baseH, panelZ);
+  for (let k = 1; k < bays; k++) st.box('up', 0.04, height - headerH - baseH, double ? 0.075 : 0.05, -length / 2 + k * bayW, baseH, double ? 0 : -depth / 2 + 0.025);
   // back panel (pegboard) per bay
   for (let k = 0; k < bays; k++) {
     const ph = height - headerH - baseH;
