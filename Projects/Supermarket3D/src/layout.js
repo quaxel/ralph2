@@ -9,7 +9,7 @@ const HALF = PI / 2;
 
 /** Named areas for the HUD location indicator: [name, xMin, xMax, zMin, zMax] (first match wins). */
 export const AREAS = [
-  ['Kasalar', -15.5, 2.5, 5.0, 10.4],
+  ['Kasalar', -16.5, 3.0, 5.0, 10.4],
   ['Meyve & Sebze', 6.0, 20, -1.8, 10.4],
   ['Şarküteri', 5.5, 11.5, -15, -10.6],
   ['Fırın', 11.5, 20, -15, -9.2],
@@ -37,7 +37,7 @@ const CAT_TR = {
   canned: 'Konserve', grocery: 'Gıda', cleaning: 'Temizlik', personal: 'Kişisel Bakım',
 };
 
-export const LANES = [-13.4, -10.8, -8.2, -5.6, -3.0];
+export const LANES = [-14.4, -11.4, -8.4, -5.4, -2.4];
 export const LANE_Z = 7.6;
 
 /**
@@ -129,7 +129,7 @@ export function buildStore(mods, log = console.warn) {
 
   // ---------- Checkouts ----------
   LANES.forEach((x, i) => place('checkout', 'createCheckoutLane', { laneNumber: i + 1, seed: 500 + i, open: i < 3 }, x, LANE_Z));
-  [[-0.2, 6.7], [1.2, 6.7], [-0.2, 8.7], [1.2, 8.7]].forEach(([x, z], i) => place('checkout', 'createSelfCheckout', { seed: 520 + i }, x, z));
+  [[0.4, 6.7], [1.8, 6.7], [0.4, 8.7], [1.8, 8.7]].forEach(([x, z], i) => place('checkout', 'createSelfCheckout', { seed: 520 + i }, x, z));
   place('checkout', 'createCustomerServiceDesk', { length: 3.0 }, -20 + 0.8, 12.2, HALF);
 
   // ---------- Action alley / promo ----------
@@ -209,5 +209,5 @@ export function populate(root, mods, placed, log = console.warn) {
 }
 
 // Offsets (relative to lane origin) – tuned to checkout.js geometry.
-export const CASHIER_OFFSET = { x: 0.45, z: 0.0 };
-export const WALKWAY_OFFSET = -1.35;
+export const CASHIER_OFFSET = { x: 0.55, z: 0.5 };
+export const WALKWAY_OFFSET = -1.6;
