@@ -259,7 +259,7 @@ const endCap = (s, k = 0.06) => (s < k ? Math.sqrt(s / k) : s > 1 - k ? Math.sqr
 function appleGeo(green) {
   const sx = 0.038, sy = 0.034;
   const g = blob({
-    sx, sy, sz: sx, wSeg: 9, hSeg: 7, prof: (y) => 1 + 0.1 * y - 0.05 * y * y, dimple: 0.2, dimpleBot: 0.07, lobes: 5, lobeAmt: 0.025,
+    sx, sy, sz: sx, wSeg: 8, hSeg: 6, prof: (y) => 1 + 0.1 * y - 0.05 * y * y, dimple: 0.2, dimpleBot: 0.07, lobes: 5, lobeAmt: 0.025,
     colorFn: (y, a) => {
       if (green) {
         let c = mixC(C('#7fbf2f'), C('#c9de55'), 0.5 + 0.5 * Math.sin(a * 5 + y * 3));
@@ -274,7 +274,7 @@ function appleGeo(green) {
 }
 function orangeGeo() {
   const g = blob({
-    sx: 0.04, sy: 0.037, sz: 0.04, wSeg: 9, hSeg: 7, noise: 0.012, nseed: 3, dimple: 0.05,
+    sx: 0.04, sy: 0.037, sz: 0.04, wSeg: 8, hSeg: 6, noise: 0.012, nseed: 3, dimple: 0.05,
     colorFn: (y, a) => mixC(C('#ee8410'), C('#ffa42c'), 0.5 + 0.5 * Math.sin(a * 3 + y * 5)),
   });
   return finishItem([g, cylPart(0.007, 0.007, 0.004, 6, '#5d7b2a', 0, 0.037 * 0.95, 0)]);
@@ -290,7 +290,7 @@ function lemonGeo() {
 function tomatoGeo() {
   const sy = 0.031;
   const g = blob({
-    sx: 0.037, sy, sz: 0.037, wSeg: 9, hSeg: 7, lobes: 5, lobeAmt: 0.035, dimple: 0.16,
+    sx: 0.037, sy, sz: 0.037, wSeg: 8, hSeg: 6, lobes: 5, lobeAmt: 0.035, dimple: 0.16,
     colorFn: (y, a) => mixC(mixC(C('#cf2418'), C('#e8452a'), 0.5 + 0.5 * Math.sin(a * 5 + 1)), C('#a8b43e'), smooth(0.75, 1, y) * 0.45),
   });
   const calyx = cylPart(0.014, 0.012, 0.004, 5, '#3f7d2b', 0, sy * 0.86, 0);
@@ -307,7 +307,7 @@ function pearGeo() {
 }
 function peachGeo() {
   const g = blob({
-    sx: 0.037, sy: 0.035, sz: 0.036, wSeg: 9, hSeg: 7, dimple: 0.1, lobes: 2, lobeAmt: 0.02,
+    sx: 0.037, sy: 0.035, sz: 0.036, wSeg: 8, hSeg: 6, dimple: 0.1, lobes: 2, lobeAmt: 0.02,
     colorFn: (y, a, x) => mixC(mixC(C('#f2b04e'), C('#df4f3e'), smooth(-0.2, 0.8, x * 1.2 + y * 0.3)), C('#f7d46a'), smooth(-0.2, -1, y) * 0.5),
   });
   return finishItem([g, cylPart(0.003, 0.003, 0.01, 4, '#5a3b20', 0, 0.035 * 0.82, 0)]);
@@ -642,8 +642,8 @@ function addCrate(B, rng, { L, D, hb, hf, fill = null, fillH = 0 }) {
   B.prism(pts, t, -L / 2 + t / 2, 0, 0, col);
   // corner posts
   for (const sx of [-1, 1]) {
-    B.box(0.03, hb + 0.004, 0.03, sx * (L / 2 - 0.015), (hb + 0.004) / 2, -D / 2 + 0.015, DARK_WOOD);
-    B.box(0.03, hf + 0.004, 0.03, sx * (L / 2 - 0.015), (hf + 0.004) / 2, D / 2 - 0.015, DARK_WOOD);
+    B.box(0.034, hb + 0.004, 0.034, sx * (L / 2 - 0.015), (hb + 0.004) / 2, -D / 2 + 0.015, DARK_WOOD);
+    B.box(0.034, hf + 0.004, 0.034, sx * (L / 2 - 0.015), (hf + 0.004) / 2, D / 2 - 0.015, DARK_WOOD);
   }
   if (fill && fillH > 0) B.box(L - 0.03, fillH, D - 0.03, 0, fillH / 2, 0, fill);
 }
@@ -725,7 +725,7 @@ export function createProduceTable({ length = 2.4, width = 1.3, height = 0.95, i
       const loc = trans(x, 0, 0);
       crates.setBase(M.clone().multiply(loc));
       addCrate(crates, rng, { L: Lc, D: Dc, hb, hf, fill: spec.fill, fillH: hf * 0.9 });
-      heap(rng, stock, M.clone().multiply(loc), Lc, Dc, spec, { hFront: hf * 1.0, hBack: hb * 1.0, dome: 0.15, step: 1.1, margin: 0.035, layers: spec.layers && spec.layers.length > 2 ? spec.layers : [{ d: 0, p: 1 }, { d: 0.9, p: 0.5 }] });
+      heap(rng, stock, M.clone().multiply(loc), Lc, Dc, spec, { hFront: hf * 1.0, hBack: hb * 1.0, dome: 0.15, step: 1.0, margin: 0.035, layers: spec.layers && spec.layers.length > 2 ? spec.layers : [{ d: 0, p: 1 }, { d: 0.9, p: 0.5 }] });
       addSign(g, M.clone().multiply(loc).multiply(trans(0, hf / 2 + 0.002, Dc / 2 + 0.004)), spec.name, spec.price);
     }
   }
@@ -832,14 +832,14 @@ export function createBulkBin({ item = 'watermelon', seed = 1 } = {}) {
     wood.box(t, sh, Dp - 2 * t, W / 2 - t / 2, y, 0, col);
     wood.box(t, sh, Dp - 2 * t, -W / 2 + t / 2, y, 0, col);
   }
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) wood.box(0.05, wallH + 0.02, 0.05, sx * (W / 2 - 0.025), pal + (wallH + 0.02) / 2, sz * (Dp / 2 - 0.025), DARK_WOOD);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) wood.box(0.056, wallH + 0.02, 0.056, sx * (W / 2 - 0.025), pal + (wallH + 0.02) / 2, sz * (Dp / 2 - 0.025), DARK_WOOD);
   // interior fill (hidden gaps)
   const fillTop = 0.34;
   wood.box(W - 0.05, fillTop, Dp - 0.05, 0, pal + fillTop / 2, 0, spec.fill || '#444');
   g.add(structMesh(wood.build(), woodMat(), 'BinBody'));
 
   const base = trans(0, pal, 0);
-  heap(rng, stock, base, W - 0.04, Dp - 0.04, spec, { hFront: 0.44, hBack: 0.46, dome: 0.2, step: 1.0, margin: 0.04 });
+  heap(rng, stock, base, W - 0.04, Dp - 0.04, spec, { hFront: 0.44, hBack: 0.46, dome: 0.2, step: 0.88, margin: 0.04, layers: spec.layers && spec.layers.length > 2 ? spec.layers : [{ d: 0, p: 1 }, { d: 0.85, p: 0.9 }] });
   stock.build(g, rng);
   // sign on front wall (slightly tilted label hung on top slat)
   addSign(g, trans(0, pal + 0.17, Dp / 2 + 0.006).multiply(rotX(-0.04)), spec.name, spec.price, 0.4, 0.17);
