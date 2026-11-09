@@ -84,7 +84,7 @@ function cdnFetch(url) {
     catch (e) { logs.push('[timeout] window.__ready never became true'); }
     await p.waitForTimeout(wait);
     const file = path.join(out, t.name + '.png');
-    await p.screenshot({ path: file });
+    await p.screenshot({ path: file, timeout: 180000 });
     const stats = await p.evaluate(() => ({ stats: window.__stats || null, errors: window.__errors || [] }));
     report.push({ screenshot: file, ...stats, console: logs });
     await p.close();
