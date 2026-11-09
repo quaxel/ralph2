@@ -357,7 +357,7 @@ function grapesGeo() {
     const c = mixC(C('#34184a'), C('#6a3a86'), rng() * 0.7);
     parts.push(spherePart(0.021, 5, 4, c, -0.045 + t * 0.1, Math.sin(a) * R * 0.9 + 0.003, Math.cos(a) * R, 1, 1, 1));
   }
-  parts.push(cylPart(0.004, 0.004, 0.03, 4, '#6b5a2a', -0.055, 0.012, 0, 0, 0, Math.PI / 2 + 0.2));
+  parts.push(cylPart(0.004, 0.004, 0.014, 4, '#6b5a2a', -0.052, 0.008, 0, 0, 0, Math.PI / 2));
   return finishItem(parts);
 }
 function cucumberGeo() {
