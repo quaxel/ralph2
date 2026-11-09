@@ -98,7 +98,7 @@ function bannerMat(text, w, h, c1, c2, fg, deco) {
     ? [['#d9a04a', 0.9], ['#c4852e', 0.7], ['#e8c27a', 0.8]]
     : [['#e43a2f', 0.9], ['#ff9a1f', 0.8], ['#8fcf4a', 0.9], ['#f7d83a', 0.7]];
   const r0 = ch * 0.28;
-  for (let k = 0; k < 2; k++) {
+  for (let k = 0; k < (deco === 'none' ? 0 : 2); k++) {
     for (let i = 0; i < icons.length; i++) {
       const x = k === 0 ? cw * 0.06 + i * r0 * 2.3 : cw * 0.94 - i * r0 * 2.3;
       const y = ch * 0.5 + (i % 2 ? -1 : 1) * ch * 0.06;
@@ -341,26 +341,24 @@ function watermelonGeo() {
 }
 function lettuceGeo() {
   const g = blob({
-    sx: 0.088, sy: 0.062, sz: 0.088, wSeg: 10, hSeg: 6, lobes: 7, lobeAmt: 0.14, noise: 0.06, nseed: 4, dimple: 0.12,
-    colorFn: (y, a) => mixC(mixC(C('#2f7a22'), C('#6fb23c'), smooth(-0.3, 0.9, y)), C('#b4d86a'), smooth(0.8, 1, y) * 0.5),
+    sx: 0.075, sy: 0.055, sz: 0.075, wSeg: 12, hSeg: 6, lobes: 9, lobeAmt: 0.2, noise: 0.09, nseed: 4, dimple: 0.1,
+    colorFn: (y, a) => mixC(mixC(C('#276a1c'), C('#5fa832'), smooth(-0.3, 0.8, y) * (0.6 + 0.4 * Math.sin(a * 9))), C('#c2dc72'), smooth(0.85, 1, y) * 0.6),
   });
   return finishItem([g]);
 }
 function grapesGeo() {
   const parts = [];
   const rng = seededRandom(19);
-  const N = 22;
+  const N = 11;
   for (let i = 0; i < N; i++) {
     const t = i / (N - 1);
-    const R = 0.045 * Math.pow(1 - t, 0.85);
+    const R = 0.036 * Math.pow(1 - t, 0.8);
     const a = i * 2.39996;
-    const c = mixC(C('#3a1f52'), C('#6a3a86'), rng() * 0.7);
-    parts.push(spherePart(0.0135, 6, 4, c, -0.02 + t * 0.12, Math.sin(a) * R * 0.9, Math.cos(a) * R, 1, 1, 1));
+    const c = mixC(C('#34184a'), C('#6a3a86'), rng() * 0.7);
+    parts.push(spherePart(0.021, 5, 4, c, -0.045 + t * 0.1, Math.sin(a) * R * 0.9 + 0.003, Math.cos(a) * R, 1, 1, 1));
   }
-  parts.push(cylPart(0.004, 0.004, 0.04, 4, '#6b5a2a', -0.04, 0.012, 0, 0, 0, Math.PI / 2 + 0.2));
-  const g = finishItem(parts);
-  g.translate(-0.025, 0, 0);
-  return g;
+  parts.push(cylPart(0.004, 0.004, 0.03, 4, '#6b5a2a', -0.055, 0.012, 0, 0, 0, Math.PI / 2 + 0.2));
+  return finishItem(parts);
 }
 function cucumberGeo() {
   return finishItem([tube({
@@ -528,8 +526,8 @@ const ITEMS = {
   onion:       { name: 'Soğan',       price: '19,90 ₺/kg', geo: onionGeo, fx: 0.086, fz: 0.086, th: 0.08, orient: 'yaw', rough: 0.55, tints: ['#ffffff', '#f4dcc0', '#e8c8a0'], fill: '#5a2e10' },
   carrot:      { name: 'Havuç',       price: '22,90 ₺/kg', geo: carrotGeo, fx: 0.19, fz: 0.04, th: 0.038, orient: 'long', rough: 0.55, tints: ['#ffffff', '#ffe8d0', '#f8d4b0'], fill: '#7a3a08', layers: [{ d: 0, p: 1 }, { d: 1.0, p: 0.6 }, { d: 2, p: 0.5 }] },
   watermelon:  { name: 'Karpuz',      price: '14,90 ₺/kg', geo: watermelonGeo, fx: 0.29, fz: 0.22, th: 0.21, orient: 'yaw', rough: 0.45, tints: ['#ffffff', '#e8f4e0', '#d4e8c8'], fill: '#1a4a22', layers: [{ d: 0, p: 1 }, { d: 0.85, p: 0.8 }] },
-  lettuce:     { name: 'Marul',       price: '42,50 ₺/adet', geo: lettuceGeo, fx: 0.17, fz: 0.17, th: 0.1, orient: 'yaw', rough: 0.8, tints: ['#ffffff', '#e8f0d0', '#d4e4b0'], fill: '#2e6a20', layers: [{ d: 0, p: 1 }, { d: 0.7, p: 0.4 }] },
-  grapes:      { name: 'Üzüm',        price: '89,90 ₺/kg', geo: grapesGeo, fx: 0.13, fz: 0.1, th: 0.05, orient: 'long', rough: 0.3, tints: ['#ffffff', '#e8d8f4', '#d0b8e8'], fill: '#2a1438', layers: [{ d: 0, p: 1 }, { d: 0.8, p: 0.6 }] },
+  lettuce:     { name: 'Marul',       price: '42,50 ₺/adet', geo: lettuceGeo, fx: 0.15, fz: 0.15, th: 0.09, orient: 'yaw', rough: 0.8, tints: ['#ffffff', '#e8f0d0', '#d4e4b0'], fill: '#2e6a20', layers: [{ d: 0, p: 1 }, { d: 0.7, p: 0.4 }] },
+  grapes:      { name: 'Üzüm',        price: '89,90 ₺/kg', geo: grapesGeo, fx: 0.14, fz: 0.095, th: 0.05, orient: 'long', rough: 0.3, tints: ['#ffffff', '#e8d8f4', '#d0b8e8'], fill: '#2a1438', layers: [{ d: 0, p: 1 }, { d: 0.9, p: 0.55 }] },
   pear:        { name: 'Armut',       price: '54,90 ₺/kg', geo: pearGeo, fx: 0.07, fz: 0.07, th: 0.065, orient: 'free', rough: 0.5, tints: ['#ffffff', '#f4f0c8', '#e8e0a0'], fill: '#5a6a18' },
   peach:       { name: 'Şeftali',     price: '64,90 ₺/kg', geo: peachGeo, fx: 0.075, fz: 0.075, th: 0.068, orient: 'free', rough: 0.75, tints: ['#ffffff', '#ffe4d0', '#f8d0b0'], fill: '#8a3a1a' },
   /* breads & pastries (used by rack / case) */
@@ -725,7 +723,7 @@ export function createProduceTable({ length = 2.4, width = 1.3, height = 0.95, i
       const loc = trans(x, 0, 0);
       crates.setBase(M.clone().multiply(loc));
       addCrate(crates, rng, { L: Lc, D: Dc, hb, hf, fill: spec.fill, fillH: hf * 0.9 });
-      heap(rng, stock, M.clone().multiply(loc), Lc, Dc, spec, { hFront: hf * 1.0, hBack: hb * 1.0, dome: 0.15, step: 1.0, margin: 0.035, layers: spec.layers && spec.layers.length > 2 ? spec.layers : [{ d: 0, p: 1 }, { d: 0.9, p: 0.5 }] });
+      heap(rng, stock, M.clone().multiply(loc), Lc, Dc, spec, { hFront: hf * 1.0, hBack: hb * 1.0, dome: 0.15, step: 1.04, margin: 0.035, layers: spec.layers && spec.layers.length > 2 ? spec.layers : [{ d: 0, p: 1 }, { d: 0.9, p: 0.4 }] });
       addSign(g, M.clone().multiply(loc).multiply(trans(0, hf / 2 + 0.002, Dc / 2 + 0.004)), spec.name, spec.price);
     }
   }
@@ -868,7 +866,7 @@ export function createScaleStand() {
   const col = new THREE.Mesh(boxGeo(0.28, 0.2, 0.06), stdMat('#cfd5da', { roughness: 0.4, metalness: 0.4 }));
   col.position.set(0, 1.1, -0.17); col.rotation.x = -0.18; col.castShadow = true; col.name = 'ScaleHead'; g.add(col);
   const scr = new THREE.Mesh(boxGeo(0.23, 0.11, 0.006), new THREE.MeshStandardMaterial({
-    map: labelTexture('TERAZİ\n0,000 kg', { width: 384, height: 200, bg: '#12351f', fg: '#7dff8c', font: 'bold 62px monospace', border: '#cfd5da' }), emissive: '#1a5a30', emissiveMap: labelTexture('TERAZİ\n0,000 kg', { width: 384, height: 200, bg: '#12351f', fg: '#7dff8c', font: 'bold 62px monospace', border: '#cfd5da' }), emissiveIntensity: 0.6, roughness: 0.3,
+    map: labelTexture('TERAZİ\n0,000 kg', { width: 384, height: 200, bg: '#12351f', fg: '#7dff8c', font: 'bold 62px monospace', border: '#cfd5da' }), emissive: '#1a5a30', emissiveMap: labelTexture('TERAZİ\n0,000 kg', { width: 384, height: 200, bg: '#12351f', fg: '#7dff8c', font: 'bold 62px monospace', border: '#cfd5da' }), emissiveIntensity: 0.35, roughness: 0.3,
   }));
   scr.position.set(0, 1.115, -0.17 + 0.0335 * Math.cos(0.18) + 0.001); scr.rotation.x = -0.18; scr.name = 'ScaleScreen'; g.add(scr);
   // bag roll holder: arm + roll + hanging bags
@@ -883,10 +881,8 @@ export function createScaleStand() {
   const core = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.29, 10), stdMat('#d9b78a', { roughness: 0.8 }));
   core.rotation.z = Math.PI / 2; core.position.copy(roll.position); g.add(core);
   const sheetMat = new THREE.MeshStandardMaterial({ color: '#eef3f6', transparent: true, opacity: 0.4, roughness: 0.2, side: THREE.DoubleSide, depthWrite: false });
-  for (let i = 0; i < 3; i++) {
-    const sh = new THREE.Mesh(boxGeo(0.26, 0.2, 0.002), sheetMat);
-    sh.position.set(0, 1.19 - i * 0.003, -0.01 + i * 0.012); sh.rotation.x = 0.08 + i * 0.03; sh.name = 'BagSheet'; g.add(sh);
-  }
+  const sh = new THREE.Mesh(boxGeo(0.26, 0.1, 0.002), sheetMat);
+  sh.position.set(0, 1.235, 0.0); sh.rotation.x = 0.1; sh.name = 'BagSheet'; g.add(sh);
   // top sign
   const sign = addBanner(g, 'TERAZİ', 0.34, 0.07, 0, 1.43 - 0.035, -0.08, '#d62f2f', '#a61e1e', '#ffffff', 'none');
   sign.scale.set(1, 1, 0.5);
@@ -1077,3 +1073,6 @@ export function showcaseItems() {
   ['onion', 'lettuce', 'pear'].forEach((id, i) => { const b = createBulkBin({ item: id, seed: 20 + i }); b.position.set(-2.4 + i * 1.4, 0, 3); g.add(b); });
   return g;
 }
+
+export function showcaseTableA() { return createProduceTable({ items: ['banana', 'grapes', 'cucumber', 'carrot'], seed: 5 }); }
+export function showcaseTableB() { return createProduceTable({ items: ['pepper_green', 'lettuce', 'watermelon', 'onion'], seed: 6 }); }

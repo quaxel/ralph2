@@ -412,8 +412,8 @@ export function createBasketStack({ count = 6, color = 0xd32f2f } = {}) {
   stand.push(boxG(0.56, 0.03, 0.4, 0, standH, 0));
   stand.push(boxG(0.56, 0.02, 0.4, 0, 0.1, 0));
   // back post carrying the sign
-  stand.push(boxG(0.03, 1.1, 0.03, -0.24, 0.55, -0.17));
-  stand.push(boxG(0.03, 1.1, 0.03, 0.24, 0.55, -0.17));
+  stand.push(boxG(0.03, 1.5, 0.03, -0.24, 0.75, -0.17));
+  stand.push(boxG(0.03, 1.5, 0.03, 0.24, 0.75, -0.17));
   g.add(mesh(merge(stand), M.metalDark, 'stand'));
 
   const body = [], trim = [];
@@ -428,9 +428,9 @@ export function createBasketStack({ count = 6, color = 0xd32f2f } = {}) {
 
   const tex = labelTexture('SEPET', { width: 384, height: 128, bg: BRAND_CSS, fg: '#ffffff', font: 'bold 84px sans-serif', border: '#ffffff' });
   const sign = mesh(new THREE.PlaneGeometry(0.5, 0.17), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 }), 'sign');
-  sign.position.set(0, 1.0, -0.15);
+  sign.position.set(0, 1.36, -0.15);
   const board = mesh(boxGeo(0.52, 0.19, 0.02), M.metalDark, 'sign_board');
-  board.position.set(0, 1.0, -0.17);
+  board.position.set(0, 1.36, -0.17);
   sign.position.z = -0.158;
   g.add(sign, board);
   setShadows(g, true, true);
@@ -704,18 +704,18 @@ export function createPottedPlant({ seed = 1 } = {}) {
 
   const stems = [], leaves = [];
   // trunk
-  const trunk = new THREE.CylinderGeometry(0.018, 0.03, 1.0, 7, 1, true);
-  trunk.translate(0, ph - 0.03 + 0.5, 0);
+  const trunk = new THREE.CylinderGeometry(0.016, 0.028, 0.85, 7, 1, true);
+  trunk.translate(0, ph - 0.03 + 0.425, 0);
   stems.push(tint(trunk, 0x6d4c33));
   const leafBase = new THREE.SphereGeometry(1, 7, 4);
   const greens = [0x2e6b34, 0x3a7d3f, 0x2a5e30, 0x4a8c45, 0x1f5428];
   const nLeaves = 46;
   for (let i = 0; i < nLeaves; i++) {
     const t = i / (nLeaves - 1);
-    const y = ph + 0.28 + t * 0.78 + (rng() - 0.5) * 0.06;
+    const y = ph + 0.25 + t * 0.6 + (rng() - 0.5) * 0.06;
     const yaw = i * 2.399 + rng() * 0.3;
     const pitch = THREE.MathUtils.lerp(0.5, 1.1, t) + (rng() - 0.5) * 0.3;  // upward angle
-    const len = THREE.MathUtils.lerp(0.19, 0.15, t) * (0.85 + rng() * 0.3);
+    const len = THREE.MathUtils.lerp(0.16, 0.12, t) * (0.85 + rng() * 0.3);
     const wid = len * 0.52;
     const lg = leafBase.clone();
     lg.scale(wid, 0.008, len);
@@ -1087,7 +1087,7 @@ export function createSecurityGates({ width = 1.4 } = {}) {
   const g = new THREE.Group();
   g.name = 'SecurityGates';
   const ph = 1.5, pd = 0.46, pt = 0.035;
-  const acrylic = new THREE.MeshStandardMaterial({ color: 0xeaf2f4, transparent: true, opacity: 0.45, roughness: 0.1, metalness: 0.0, depthWrite: false });
+  const acrylic = new THREE.MeshStandardMaterial({ color: 0xbcd6e0, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0.0, depthWrite: false });
   const base = [], light = [], panels = [];
   for (const sx of [-1, 1]) {
     const x = sx * width / 2;
@@ -1101,9 +1101,9 @@ export function createSecurityGates({ width = 1.4 } = {}) {
     base.push(boxG(0.006, 0.012, pd - 0.1, x, 0.08 + 0.1, 0));
     base.push(boxG(0.006, 0.012, pd - 0.1, x, 0.08 + ph - 0.1, 0));
     // light strip on the inner side
-    light.push(boxG(0.01, 0.7, 0.025, x - sx * (pt / 2 + 0.003), 0.08 + ph * 0.55, pd / 2 - 0.035));
+    light.push(boxG(0.014, 0.7, 0.03, x - sx * (pt / 2 + 0.003), 0.08 + ph * 0.55, pd / 2 - 0.035));
   }
-  g.add(mesh(merge(base), stdMat(0xe9ecef, { roughness: 0.5 }), 'bases'));
+  g.add(mesh(merge(base), stdMat(0xaab2b9, { roughness: 0.45, metalness: 0.2 }), 'bases'));
   g.add(mesh(merge(panels), acrylic, 'acrylic'));
   g.add(mesh(merge(light), stdMat(0x66ff88, { emissive: 0x22dd55, emissiveIntensity: 1.6, roughness: 0.4 }), 'light_strips'));
   setShadows(g, true, true);
@@ -1147,20 +1147,5 @@ export function showcase() {
   put(createPalletDisplay({ kind: 'cola', seed: 2 }), 1.2, 6.5);
   put(createPalletDisplay({ kind: 'flour', seed: 3 }), 2.9, 6.5);
   put(createSecurityGates({ width: 1.4 }), 5.4, 6.5);
-  return root;
-}
-
-// temporary close-up showcase
-export function showcasePeople() {
-  const root = new THREE.Group();
-  [['casual', 'stand', 1], ['casual', 'walk', 2], ['cashier', 'sit', 3], ['cashier', 'stand', 4], ['staff', 'stand', 5], ['staff', 'walk', 6], ['casual', 'stand', 8], ['casual', 'walk', 9]]
-    .forEach(([o, p, s], i) => { const m = createPerson({ seed: s, outfit: o, pose: p }); m.position.x = i * 0.9; root.add(m); });
-  return root;
-}
-export function showcaseSmall() {
-  const root = new THREE.Group();
-  const items = [createBasket({ filled: true, seed: 2 }), createBasketStack({ count: 6 }), createCartCorral({ count: 4 }), createTrashBin(), createWetFloorSign(), createATM(), createPromoStand(), createSecurityGates()];
-  let x = 0;
-  items.forEach((m) => { m.position.x = x; x += 1.5; root.add(m); });
   return root;
 }

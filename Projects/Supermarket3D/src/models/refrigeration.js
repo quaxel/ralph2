@@ -261,7 +261,8 @@ function fillLane(pack, rng, P, o) {
   const cols = Math.max(1, Math.floor((o.x1 - o.x0 + 1e-6) / w));
   const rows = Math.max(1, Math.min(o.rows || 3, Math.floor((o.zFront - o.zBack + 1e-6) / d)));
   const stack = o.stack || 1;
-  const xs = (o.x0 + o.x1) / 2 - (cols * w) / 2 + w / 2;
+  const wx = o.noStretch ? w : Math.max(w, (o.x1 - o.x0) / cols);   // spread columns across the lane
+  const xs = (o.x0 + o.x1) / 2 - (cols * wx) / 2 + wx / 2;
   const base = new THREE.Color(o.color);
   for (let r = 0; r < rows; r++) {
     const z = o.zFront - d / 2 - r * d;
@@ -269,7 +270,7 @@ function fillLane(pack, rng, P, o) {
       if (r > 0 && rng() < 0.05) continue;
       _c.copy(base).multiplyScalar(0.9 + 0.2 * rng());
       for (let k = 0; k < stack; k++) {
-        pack.add(o.type, P, xs + c * w + (rng() - 0.5) * 0.004, (o.y || 0) + k * h, z + (rng() - 0.5) * 0.004,
+        pack.add(o.type, P, xs + c * wx + (rng() - 0.5) * 0.004, (o.y || 0) + k * h, z + (rng() - 0.5) * 0.004,
           (rng() - 0.5) * (o.jit === undefined ? 0.1 : o.jit), s[0], s[1], s[2], _c);
       }
     }
@@ -298,13 +299,13 @@ function stockShelf(pack, rng, P, level, o) {
 const PETS = ['#4b2a1c', '#f08a1c', '#9ad24b', '#cfe8f3', '#b71f2b', '#f3b24a', '#c98a30', '#7a3fa0'];
 const CANS = ['#c9202c', '#1f5fb0', '#cfd4d9', '#2f9a52', '#f0c52c', '#2b2b2f', '#f27c1d'];
 const WATERS = ['#cfe8f3', '#bfe0ee', '#d9eef5'];
-const DAIRYW = ['#f6f4ee', '#e6eef7', '#f4ecd2', '#e9f0e0'];
+const DAIRYW = ['#f6f4ee', '#cfe3f5', '#f4e2a8', '#d4ecc8', '#f6d3d9'];
 const DRINK_LEVELS = [
   { n: [2, 3], skus: [{ t: 'pet', s: [1, 1, 1], pal: PETS, rows: 3 }] },
   { n: [3], skus: [{ t: 'pet', s: [0.88, 0.8, 0.88], pal: PETS, rows: 3 }, { t: 'pet', s: [0.85, 0.85, 0.85], pal: WATERS, rows: 3 }] },
-  { n: [4], skus: [{ t: 'can', s: [1, 1, 1], pal: CANS, rows: 4 }] },
+  { n: [4], skus: [{ t: 'can', s: [1, 1, 1], stack: 2, pal: CANS, rows: 4 }] },
   { n: [3], skus: [{ t: 'ayran', s: [1.1, 1.2, 1.1], pal: DAIRYW, rows: 3 }, { t: 'carton', s: [1, 1, 1], pal: ['#f08c1a', '#d12f2f', '#f2c230', '#7ab648'], rows: 3 }] },
-  { n: [3, 4], skus: [{ t: 'pet', s: [0.7, 0.75, 0.7], pal: WATERS.concat(['#9ad24b', '#f08a1c']), rows: 3 }, { t: 'can', s: [1, 1, 1], pal: CANS, rows: 4 }] },
+  { n: [3, 4], skus: [{ t: 'pet', s: [0.7, 0.75, 0.7], pal: WATERS.concat(['#9ad24b', '#f08a1c']), rows: 3 }, { t: 'can', s: [1, 1, 1], stack: 2, pal: CANS, rows: 4 }] },
 ];
 const DAIRY_LEVELS = [
   { n: [2, 3], skus: [{ t: 'yogTub', s: [1.15, 1.15, 1.15], pal: DAIRYW.concat(['#f2dfae']), rows: 3 }] },
@@ -458,7 +459,8 @@ export function createOpenMultideck({ length = 2.5, height = 2.0, depth = 0.95, 
   // plinth + base body
   S.box(MAT.black, L - 0.1, 0.1, D - 0.1, 0, 0.05, 0);
   S.box(MAT.white, L - 0.1, 0.68, D, 0, 0.44, 0);
-  S.box(accent, L - 0.1, 0.12, 0.006, 0, 0.3, D / 2 + 0.002);
+  S.box(accent, L - 0.1, 0.3, 0.006, 0, 0.32, D / 2 + 0.002);
+  S.box(MAT.white, L - 0.1, 0.012, 0.008, 0, 0.5, D / 2 + 0.004);
   S.box(MAT.steel, L - 0.1, 0.05, 0.14, 0, 0.805, D / 2 - 0.07);
   S.cyl(MAT.steel, 0.022, 0.022, L - 0.1, 10, 0, 0.84, D / 2 - 0.03, 0, 0, HP);
   // air curtain grill
@@ -549,7 +551,7 @@ export function createChestFreezer({ length = 2.4, width = 0.95, height = 0.9, c
   const iw = L - 0.2, id = Wd - 0.2;
   const nx = Math.max(2, Math.round(iw / 0.56)), nz = 2;
   const cw = iw / nx, cd = id / nz;
-  const top = wallTop - 0.05;
+  const top = wallTop - 0.02;
   const mixes = category === 'frozen'
     ? ['pizzaBox', 'frozenBag', 'frozenBox', 'frozenBag', 'pizzaBox', 'frozenBox']
     : ['iceTub', 'frozenBox', 'iceTub', 'iceTub', 'frozenBox', 'iceTub'];
@@ -570,7 +572,7 @@ export function createChestFreezer({ length = 2.4, width = 0.95, height = 0.9, c
       const cx = -iw / 2 + (ix + 0.5) * cw, cz = -id / 2 + (iz + 0.5) * cd;
       S.box(MAT.frost, cw - 0.03, pileTop - floorY, cd - 0.03, cx, (pileTop + floorY) / 2, cz);
       const P = M4(cx, pileTop, cz);
-      const col = new THREE.Color(pick(rng, pals[type])).lerp(WHITE, 0.12);
+      const col = new THREE.Color(pick(rng, pals[type])).lerp(WHITE, 0.0);
       fillLane(pack, rng, P, {
         type, s: [1, sy, 1], stack, rows: 3, x0: -cw / 2 + 0.025, x1: cw / 2 - 0.025, zFront: cd / 2 - 0.025, zBack: -cd / 2 + 0.025, y: 0,
         color: col, gapX: 1.0, gapZ: 1.0,
@@ -631,9 +633,9 @@ export function createDeliCounter({ length = 4.0, depth = 1.2, height = 1.35, se
 
   // canopy, back glass, end glass, front glass
   const y1 = H - 0.05;
-  S.box(MAT.steel, L, 0.05, zF - zS - 0.12, 0, H - 0.025, zS + (zF - zS - 0.12) / 2 - 0.0);
+  S.box(MAT.steel, L, 0.05, 0.5, 0, H - 0.025, zS + 0.25);
   S.box(MAT.warmLed, L - 0.3, 0.012, 0.05, 0, y1 - 0.007, zS + 0.2);
-  S.box(MAT.warmLed, L - 0.3, 0.012, 0.05, 0, y1 - 0.007, zS + 0.5);
+  S.box(MAT.warmLed, L - 0.3, 0.012, 0.05, 0, y1 - 0.007, zS + 0.42);
   S.box(MAT.steel, L, 0.03, 0.03, 0, 0.95 + 0.07, zS);                             // back lower rail
   S.box(MAT.steel, L, 0.025, 0.03, 0, y1 - 0.0, zS);                               // back upper rail
   S.box(MAT.steel, L, 0.045, 0.02, 0, 0.945 + 0.02, zS);
