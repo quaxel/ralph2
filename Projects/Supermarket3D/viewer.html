@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Model Viewer</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #d9dde2; font-family: system-ui, sans-serif; }
+    #info { position: fixed; left: 8px; top: 8px; background: rgba(0,0,0,.65); color: #fff; padding: 6px 10px; font: 12px/1.4 monospace; border-radius: 6px; white-space: pre; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="info">yükleniyor…</div>
+  <script type="module" src="./src/viewer.js"></script>
+</body>
+</html>
